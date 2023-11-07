@@ -279,29 +279,3 @@ def make_a_BFE(pos, mass, config=None, basis_id='sphereSL', time=0,
     
     return basis, coefs
 
-def spherical_avg_prop(basis, coefficients, time=0, radius=np.linspace(0.1, 600, 100), property='dens'):
-    """
-    Computes the spherically averaged value of the specified property of the field over the given radii.
-
-    Args:
-    basis (obj): Object containing the basis functions for the simulation.
-    coefficients (obj): Object containing the coefficients for the simulation.
-    time (float, optional): The time at which to evaluate the field. Default is 0.
-    radius (ndarray, optional): An array of radii over which to compute the spherically averaged property. Default is an
-        array of 100 values logarithmically spaced between 0.1 and 600.
-    property (str, optional): The property of the field to evaluate. Can be 'dens', 'pot', or 'force'. Default is 'dens'.
-
-    Returns:
-    ndarray: An array of spherically averaged values of the specified property over the given radii.
-
-    Raises:
-    ValueError: If the property argument is not 'dens', 'pot', or 'force'.
-    """
-
-    coefficients.set_coefs(coefficients.getCoefStruct(time))
-    field = [find_field(basis, np.hstack([[rad], [0], [0]]), property=property, include_monopole=True) for rad in radius]
-
-    if property == 'force':
-        return np.vstack(field), radius
-
-    return np.array(field), radius
