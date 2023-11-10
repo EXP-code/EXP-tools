@@ -1,8 +1,5 @@
 import os, sys, pickle, pyEXP
 import numpy as np
-import makemodel
-from makemodel import hernquist_halo
-
 
 ###Field computations for plotting###
 def make_basis_plot(basis, savefile=None, nsnap='mean', y=0.92, dpi=200):
