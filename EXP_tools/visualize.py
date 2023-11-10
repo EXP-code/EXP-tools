@@ -115,8 +115,8 @@ def spherical_avg_prop(basis, coefficients, time=0, radius=np.linspace(0.1, 600,
     return np.array(field), radius
 
 def return_fields_in_grid(basis, coefficients, times=[0], 
-                       projection='3D', proj_plane=0, 
-                       grid_lim=300, npoints=150,):
+                          projection='3D', proj_plane=0, 
+                          grid_lim=300, npoints=150,):
 
     """
     Returns the 2D or 3D field grids as a dict at each time step as a key.
