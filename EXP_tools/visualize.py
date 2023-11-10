@@ -130,7 +130,7 @@ def return_fields_in_grid(basis, coefficients, times=[0],
     npoints (int, optional): the number of grid points in each dimension
     grid_limits (float, optional): the limits of the grid in the dimensions.
 
-    Returns:
+    Returns: fields along with the specified 2D or 3D grid. The fields are in a
     heirarchical dict structure with for each time:
         dict_keys(['d', 'd0', 'd1', 'dd', 'fp', 'fr', 'ft', 'p', 'p0', 'p1'])
         where 
