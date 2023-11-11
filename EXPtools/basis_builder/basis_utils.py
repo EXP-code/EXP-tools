@@ -1,6 +1,6 @@
 import os, sys, pickle, pyEXP
 import numpy as np
-import makemodel
+from . import  makemodel
 
 def make_config(basis_id, numr, rmin, rmax, lmax, nmax, scale, 
                 modelname='', cachename='.slgrid_sph_cache'):
@@ -239,7 +239,7 @@ def makebasis(pos, mass, basis_model, config=None, basis_id='sphereSL', time=0,
            The basis is an instance of pyEXP.basis.Basis, and the coefficients are 
            an instance of pyEXP.coefs.Coefs.
     """
-    
+    """
     if os.path.isfile(modelname) == False:
         print("-> File model not found so we are computing one \n")
         if empirical == True:
@@ -282,4 +282,5 @@ def makebasis(pos, mass, basis_model, config=None, basis_id='sphereSL', time=0,
       coefs.ExtendH5Coefs(coef_file)
     
     return basis, coefs
-
+    """
+    return None

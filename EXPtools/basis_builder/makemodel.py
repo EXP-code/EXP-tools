@@ -81,14 +81,19 @@ def makemodel(dvals, rvals, M, unit_physical=False,
 
         print(rvals.size,file=f)
 
-        if unit_physical = True:
+        if unit_physical == True:
             for indx in range(0,rvals.size):
-                print('{0} {1} {2} {3}'.format(rvals[indx],\
-                                              dvals[indx],\
-                                              mvals[indx],\
-                                              pvals[indx]),file=f)
+                print('{0} {1} {2} {3}'.format(rvals[indx],
+                                               dvals[indx],
+                                               mvals[indx],
+                                               pvals[indx]),file=f)
         else: 
-        
+            for indx in range(0,rvals.size):
+                print('{0} {1} {2} {3}'.format(rvals[indx],
+                                               dvals[indx]*dfac,
+                                               mvals[indx]*mfac,
+                                               pvals[indx]*pfac),file=f)
+    
         f.close()
     
     if return_val:

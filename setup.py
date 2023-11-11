@@ -6,5 +6,5 @@ setuptools.setup(
         author="B-BFE collaboration",
         author_email="ngaravito@flatironinstitute.org",
         description="Analysis tools for EXP and other BFE packages",
-        packages=["EXP_tools"],
+        packages=["EXPtools", "EXPtools/basis_builder/", "EXPtools/visuals"],
         )

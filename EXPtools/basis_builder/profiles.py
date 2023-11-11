@@ -1,7 +1,7 @@
 import numpy as np
 from scipy import special
 
-Class Profiles:
+class Profiles:
     def __init__(self, radius, scale_radius, alpha=1., beta=2.0):
         """
         Class with density profiles of Dark Matter halos
