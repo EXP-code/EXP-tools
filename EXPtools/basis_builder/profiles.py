@@ -109,8 +109,8 @@ class Profiles:
         """
         
         
-        prefac = 0.5*(1.-special.erf((ra-rcen)/wcen))
-        return prefac*(ra**-self.alpha)*(1+ra)**(-self.beta+self.alpha)
+        prefac = 0.5*(1.-special.erf((self.ra-rcen)/wcen))
+        return prefac*(self.ra**-self.alpha)*(1+self.ra)**(-self.beta+self.alpha)
 
     def hernquist_halo(self):
         """
