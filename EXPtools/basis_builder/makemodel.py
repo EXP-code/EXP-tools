@@ -5,7 +5,7 @@ TODO:
 import numpy as np
 
 
-def makemodel(dvals, rvals, M, unit_physical=False,
+def makemodel(dvals, rvals, M, unit_physical=False, return_val=False,
               pfile='', plabel = '', verbose=True):
     """
     Make an EXP-compatible spherical basis function table
@@ -96,8 +96,8 @@ def makemodel(dvals, rvals, M, unit_physical=False,
     
         f.close()
     
-    if return_val:
-        if unit_phy:
+    if return_val==True:
+        if unit_physical==True:
             return rvals, dvals, mvals, pvals
         else:
             return rvals*rfac, dfac*dvals, mfac*mvals, pfac*pvals
