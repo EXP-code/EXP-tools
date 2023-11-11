@@ -109,12 +109,12 @@ class Profiles:
         """
         
         
-        prefac = 0.5*(1.-scipy.special.erf((ra-rcen)/wcen))
+        prefac = 0.5*(1.-special.erf((ra-rcen)/wcen))
         return prefac*(ra**-self.alpha)*(1+ra)**(-self.beta+self.alpha)
 
     def hernquist_halo(self):
         """
-        TODO: DO we need these profile
+        TODO: Do we need these profile
         Hernquist halo
         
         inputs
