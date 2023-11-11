@@ -1,7 +1,7 @@
-# EXP_tools
-This is a shared repo with all the tools developed for cosmological+external simulations 
+# EXPtools
+EXPtools is a Python library that contains analysis routines for [pyEXP](https://github.com/EXP-code/EXP). EXPtools was designed with the aim of analyze cosmological and idealized N-body simulations 
 
-To install EXPtools run: 
+### Installation: 
 
 ```bash
 python -m pip install .
