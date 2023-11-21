@@ -179,7 +179,7 @@ def return_fields_in_grid(basis, coefficients, times=[0],
     
     field_gen = pyEXP.field.FieldGenerator(times, pmin, pmax, grid)
 
-    return field_gen.volumes(basis, coefs), xgrid
+    return field_gen.volumes(basis, coefficients), xgrid
 
 def slice_fields(basis, coefficients, time=0, 
                  projection='XY', proj_plane=0, npoints=300, 
