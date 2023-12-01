@@ -33,13 +33,13 @@ jobs:
       - name: Setup submodule and build
         run: |
           git submodule update --init --recursive
-          mkdir -p build/install
+          mkdir -p exp/build/install
 
       - name: Compile pyEXP - Linux
         if: runner.os == 'Linux'
         env:
           CC: ${{ matrix.cc }}
-        working-directory: ./build
+        working-directory: ./exp/build
         run: >-
           cmake
           -DENABLE_NBODY=NO
@@ -77,13 +77,13 @@ jobs:
       - name: Setup submodule and build
         run: |
           git submodule update --init --recursive
-          mkdir -p build/install
+          mkdir -p exp/build/install
 
       - name: Compile Full EXP - Linux
         if: runner.os == 'Linux'
         env:
           CC: ${{ matrix.cc }}
-        working-directory: ./build
+        working-directory: ./exp/build
         run: >-
           cmake
           -DENABLE_NBODY=YES
