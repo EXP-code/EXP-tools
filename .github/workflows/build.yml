@@ -16,8 +16,13 @@ jobs:
     name: "Test pyEXP Build"
     runs-on: ${{ matrix.os }}
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
+      - name: Check out main EXP repo
+        uses: actions/checkout@v4
+        with:
+          repository: EXP-code/EXP
+          token: ${{ secrets.EXP_PAT }}
+          path: exp
+          ref: main
 
       - name: Install core dependencies - ubuntu
         if: runner.os == 'Linux'
