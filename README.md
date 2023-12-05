@@ -7,3 +7,8 @@ EXPtools is a Python library that contains analysis routines for [pyEXP](https:/
 python -m pip install .
 ```
 [![Python package](https://github.com/jngaravitoc/EXP_tools/actions/workflows/python-package.yml/badge.svg)](https://github.com/jngaravitoc/EXP_tools/actions/workflows/python-package.yml)
+
+
+### Docuentation:
+
+The ``EXPtools`` documenntation is hosted (temporaily) [here](https://users.flatironinstitute.org/~nico/EXPtools/docs/) 
