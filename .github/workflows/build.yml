@@ -39,7 +39,7 @@ jobs:
         if: runner.os == 'Linux'
         env:
           CC: ${{ matrix.cc }}
-        working-directory: exp/build
+        working-directory: EXP/build
         run: >-
           cmake
           -DENABLE_NBODY=NO
