@@ -33,13 +33,13 @@ jobs:
       - name: Setup submodule and build
         run: |
           git submodule update --init --recursive
-          mkdir -p exp/build/install
+          mkdir -p EXP/build/install
 
       - name: Compile pyEXP - Linux
         if: runner.os == 'Linux'
         env:
           CC: ${{ matrix.cc }}
-        working-directory: ./exp/build
+        working-directory: ./EXP/build
         run: >-
           cmake
           -DENABLE_NBODY=NO
