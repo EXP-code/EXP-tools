@@ -11,7 +11,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest]
-        cc: [gcc, mpicc]
+        cc: [gcc]
 
     name: "Test pyEXP Build"
     runs-on: ${{ matrix.os }}
