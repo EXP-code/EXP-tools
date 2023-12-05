@@ -31,15 +31,17 @@ jobs:
           sudo apt-get install -y build-essential libeigen3-dev libfftw3-dev libhdf5-dev libopenmpi-dev
       
       - name: Setup submodule and build
+        working-directory: exp
         run: |
           git submodule update --init --recursive
-          mkdir -p exp/build/install
+          mkdir -p build/install 
+          ls
 
       - name: Compile pyEXP - Linux
         if: runner.os == 'Linux'
         env:
           CC: ${{ matrix.cc }}
-        working-directory: EXP/build
+        working-directory: exp/build
         run: >-
           cmake
           -DENABLE_NBODY=NO
