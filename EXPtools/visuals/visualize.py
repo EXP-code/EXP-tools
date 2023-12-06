@@ -1,4 +1,4 @@
-import os, sys, pickle, pyEXP
+import os,  sys, pickle, pyEXP
 import numpy as np
 
 ###Field computations for plotting###
@@ -6,15 +6,21 @@ def make_basis_plot(basis, savefile=None, nsnap='mean', y=0.92, dpi=200):
     """
     Plots the potential of the basis functions for different values of l and n.
 
-    Args:
-    basis (obj): object containing the basis functions for the simulation
-    savefile (str, optional): name of the file to save the plot as
-    nsnap (str, optional): description of the snapshot being plotted
-    y (float, optional): vertical position of the main title
-    dpi (int, optional): resolution of the plot in dots per inch
+    Parameters
+    ----------
+    basis: object
+        object containing the basis functions for the simulation
+        savefile (str, optional): name of the file to save the plot as
+        nsnap (str, optional): description of the snapshot being plotted
+    y: float (optional
+        vertical position of the main title 
+    dpi: int (optional)
+        resolution of the plot in dots per inch
 
-    Returns:
+    Returns
+    -------
     None
+        None
 
     """
     # Set up grid for plotting potential
@@ -52,20 +58,29 @@ def find_field(basis, coefficients, time=0, xyz=(0, 0, 0), property='dens', incl
     """
     Finds the value of the specified property of the field at the given position.
 
-    Args:
-    basis (obj): Object containing the basis functions for the simulation.
-    coefficients (obj): Object containing the coefficients for the simulation.
-    time (float, optional): The time at which to evaluate the field. Default is 0.
-    xyz (tuple or list, optional): The (x, y, z) position at which to evaluate the field. Default is (0, 0, 0).
-    property (str, optional): The property of the field to evaluate. Can be 'dens', 'pot', or 'force'. Default is 'dens'.
-    include_monopole (bool, optional): Whether to return the monopole contribution to the property only. Default is True.
+    Parameters
+    ----------
+        basis: object 
+            Object containing the basis functions for the simulation.
+        coefficients: oject 
+            Object containing the coefficients for the simulation.
+        time: float (optional) 
+            The time at which to evaluate the field. Default is 0.
+        xyz: tuple or list (optional) 
+            The (x, y, z) position at which to evaluate the field. Default is (0, 0, 0).
+        property: str (optional) 
+            The property of the field to evaluate. Can be 'dens', 'pot', or 'force'. Default is 'dens'.
+        include_monopole: bool (optional) 
+            Whether to return the monopole contribution to the property only. Default is True.
 
-    Returns:
-    float or list: The value of the specified property of the field at the given position. If property is 'force', a list of
-    three values is returned representing the force vector in (x, y, z) directions.
+    Returns
+    -------
+        field: float or list
+            The value of the specified property of the field at the given position. If property is 'force', a list of three values is returned representing the force vector in (x, y, z) directions.
 
-    Raises:
-    ValueError: If the property argument is not 'dens', 'pot', or 'force'.
+    Raises
+    ------
+        ValueError: If the property argument is not 'dens', 'pot', or 'force'.
     """
 
     coefficients.set_coefs(coefficients.getCoefStruct(time))
@@ -91,19 +106,29 @@ def spherical_avg_prop(basis, coefficients, time=0, radius=np.linspace(0.1, 600,
     """
     Computes the spherically averaged value of the specified property of the field over the given radii.
 
-    Args:
-    basis (obj): Object containing the basis functions for the simulation.
-    coefficients (obj): Object containing the coefficients for the simulation.
-    time (float, optional): The time at which to evaluate the field. Default is 0.
-    radius (ndarray, optional): An array of radii over which to compute the spherically averaged property. Default is an
-        array of 100 values logarithmically spaced between 0.1 and 600.
-    property (str, optional): The property of the field to evaluate. Can be 'dens', 'pot', or 'force'. Default is 'dens'.
+    Parameters
+    ----------
+    basis: object
+        bject containing the basis functions for the simulation.
+    coefficients: object 
+        bject containing the coefficients for the simulation.
+    time: float (optional) 
+        The time at which to evaluate the field. Default is 0.
+    radius: ndarray (optional) 
+        An array of radii over which to compute the spherically averaged property. Default is an array of 100 values logarithmically spaced between 0.1 and 600.
+    property:  str (optional)
+        The property of the field to evaluate. Can be 'dens', 'pot', or 'force'. Default is 'dens'.
 
-    Returns:
-    ndarray: An array of spherically averaged values of the specified property over the given radii.
+    Returns
+    -------
+    field_r: Array  
+        An array of spherically averaged values of the specified field over the given radii.
 
+    radius: array
+        Radius at where the field is evaluated
     Raises:
-    ValueError: If the property argument is not 'dens', 'pot', or 'force'.
+    ValueError: 
+        If the property argument is not 'dens', 'pot', or 'force'.
     """
 
     coefficients.set_coefs(coefficients.getCoefStruct(time))
