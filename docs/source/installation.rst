@@ -13,7 +13,8 @@ Python Dependencies
 
 * Python 
 * Numpy
-* Scipy 
+* Scipy
+* Healpy 
 * Gala  (optional)
 * Galpy (optional)
 * AGAMA (optional)
