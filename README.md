@@ -11,4 +11,4 @@ python -m pip install .
 
 ### Docuentation:
 
-The ``EXPtools`` documenntation is hosted (temporaily) [here](https://users.flatironinstitute.org/~nico/EXPtools/docs/) 
+The ``EXPtools`` documenntation is hosted (temporarily) [here](https://users.flatironinstitute.org/~nico/EXPtools/docs/) 
