@@ -115,8 +115,8 @@ def spherical_avg_prop(basis, coefficients, time=0, radius=np.linspace(0.1, 600,
     return np.array(field), radius
 
 def return_fields_in_grid(basis, coefficients, times=[0], 
-                          projection='3D', proj_plane=0, 
-                          grid_lim=300, npoints=150,):
+                       projection='3D', proj_plane=0, 
+                       grid_lim=300, npoints=150,):
 
     """
     Returns the 2D or 3D field grids as a dict at each time step as a key.
@@ -130,7 +130,7 @@ def return_fields_in_grid(basis, coefficients, times=[0],
     npoints (int, optional): the number of grid points in each dimension
     grid_limits (float, optional): the limits of the grid in the dimensions.
 
-    Returns: fields along with the specified 2D or 3D grid. The fields are in a
+    Returns:
     heirarchical dict structure with for each time:
         dict_keys(['d', 'd0', 'd1', 'dd', 'fp', 'fr', 'ft', 'p', 'p0', 'p1'])
         where 
@@ -144,6 +144,8 @@ def return_fields_in_grid(basis, coefficients, times=[0],
         - 'p': Total potential at each point.
         - 'p0': Potential in the monopole term.
         - 'p1': Potential in l>0 terms.
+        
+    xgrid used to make the fields. 
     """
 
     assert projection in ['3D', 'XY', 'XZ', 'YZ'], "Invalid value for 'projection'. Must be one of '3D', 'XY', 'XZ', or 'YZ'."
@@ -158,28 +160,32 @@ def return_fields_in_grid(basis, coefficients, times=[0],
         ##create a projection grid along with it
         x = np.linspace(-grid_lim, grid_lim, npoints)
         xgrid = np.meshgrid(x, x, x)
+        
+        field_gen = pyEXP.field.FieldGenerator(times, pmin, pmax, grid)
+        return field_gen.volumes(basis, coefficients), xgrid
 
     else:
         x = np.linspace(-grid_lim, grid_lim, npoints)
         xgrid = np.meshgrid(x, x)
-        grid  = [npoints, npoints]
-        
+                
         if projection == 'XY':        
             pmin  = [-grid_lim, -grid_lim, proj_plane]
             pmax  = [grid_lim, grid_lim, proj_plane]
+            grid  = [npoints, npoints, 0]
             
         elif projection == 'XZ':
             pmin  = [-grid_lim,  proj_plane, -grid_lim]
             pmax  = [grid_lim, proj_plane, grid_lim]
+            grid  = [npoints, 0, npoints]
 
         elif projection == 'YZ':
             pmin  = [proj_plane,  -grid_lim, -grid_lim]
             pmax  = [proj_plane, grid_lim, grid_lim]
+            grid  = [0, npoints, npoints]
+        
+        field_gen = pyEXP.field.FieldGenerator(times, pmin, pmax, grid)
+        return field_gen.slices(basis, coefficients), xgrid
 
-    
-    field_gen = pyEXP.field.FieldGenerator(times, pmin, pmax, grid)
-
-    return field_gen.volumes(basis, coefficients), xgrid
 
 def slice_fields(basis, coefficients, time=0, 
                  projection='XY', proj_plane=0, npoints=300, 
