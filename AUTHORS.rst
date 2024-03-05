@@ -1,9 +1,7 @@
-**Main author:** Nicolas Garavito-Camargo (`@nico <https://github.com/jngaravitoc>`_)
-
 All contributors (alphabetical last name):
 
-* Arpit Arora
-* Nico Garavito-Camargo
-* Mike Petersen
-* Adrian Price-Whelan
+* Arpit Arora (`@appy2806 <https://github.com/appy2806/>`_)
+* Nico Garavito-Camargo (`@nico <https://github.com/jngaravitoc>`_) 
+* Mike Petersen (`@Michael-Petersen <https://github.com/michael-petersen>`_) 
+* Adrian Price-Whelan (`@adrn <https://github.com/adrn>`_)  
 

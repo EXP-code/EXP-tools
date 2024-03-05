@@ -207,7 +207,7 @@ def make_exp_basis_table(radius, density, outfile='', plabel='',
     
 def makebasis(pos, mass, basis_model, config=None, basis_id='sphereSL', time=0, 
                numr=500, rmin=0.61, rmax=599, lmax=4, nmax=20, scale=22.5, 
-               modelname='dens_table.txt', cachename='.slgrid_sph_cache', add_coef = False, coef_file=''):
+               norm_mass_coef = True, modelname='dens_table.txt', cachename='.slgrid_sph_cache', add_coef = False, coef_file=''):
     """
     Create a BFE expansion for a given set of particle positions and masses.
     
@@ -239,7 +239,7 @@ def makebasis(pos, mass, basis_model, config=None, basis_id='sphereSL', time=0,
            The basis is an instance of pyEXP.basis.Basis, and the coefficients are 
            an instance of pyEXP.coefs.Coefs.
     """
-    """
+    
     if os.path.isfile(modelname) == False:
         print("-> File model not found so we are computing one \n")
         if empirical == True:
@@ -250,7 +250,8 @@ def makebasis(pos, mass, basis_model, config=None, basis_id='sphereSL', time=0,
         
         makemodel.Profiles(density_profile)
         
-        R, D, M, P = makemodel.makemodel(rvals=np.logspace(np.log10(rmin), np.log10(rmax), numr), rho, outfile=modelname, return_values=True)
+        R, D, M, P = makemodel.makemodel(rho, rvals=np.logspace(np.log10(rmin),
+            np.log10(rmax), numr), M=np.sum(mass), outfile=modelname, return_values=True)
             print('-> Computing analytical Hernquist model')
             R, D, M, P = makemodel.makemodel(hernquist_halo, 1, [scale], rvals=, pfile=modelname)
         print('-> Model computed: rmin={}, rmax={}, numr={}'.format(R[0], R[-1], len(R)))
@@ -273,7 +274,11 @@ def makebasis(pos, mass, basis_model, config=None, basis_id='sphereSL', time=0,
     basis.cacheInfo(cachename)
     
     #compute coefficients
-    coef = basis.createFromArray(mass/np.sum(mass), pos, time=time)
+    if norm_mass_coef == True :
+        coef = basis.createFromArray(mass/np.sum(mass), pos, time=time)
+    elif norm_mass_coef == False : 
+        coef = basis.createFromArray(mass, pos, time=time)
+
     coefs = pyEXP.coefs.Coefs.makecoefs(coef, 'dark halo')
     coefs.add(coef)
     if add_coef == False:
@@ -282,5 +287,3 @@ def makebasis(pos, mass, basis_model, config=None, basis_id='sphereSL', time=0,
       coefs.ExtendH5Coefs(coef_file)
     
     return basis, coefs
-    """
-    return None
