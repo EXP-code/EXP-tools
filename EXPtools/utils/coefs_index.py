@@ -26,7 +26,11 @@ def I(l, m):
     Returns:
         int: The index corresponding to the specified angular numbers.
     """
-    return int(l * (l + 1) / 2) + m
+    import math
+    assert isinstance(l, int) and isinstance(m, int), "l and m must be integers"
+    assert l >= 0, "l must be greater than 0"
+    assert abs(m) <= l, "m must be less than or equal to l"
+    return int(l * (l + 1) / 2) + abs(m)
 
 def inverse_I(I):
     """
@@ -38,6 +42,8 @@ def inverse_I(I):
     Returns:
         tuple: A tuple containing the angular numbers (l, m).
     """
+    import math
+    assert isinstance(I, int) and I >=0, "I must be an interger greater than or equal to 0"
     l = math.floor((-1 + math.sqrt(1 + 8 * I)) / 2)  # Calculate l using the inverse of the formula
     m = I - int(l * (l + 1) / 2)  # Calculate m using the given formula
     return l, m
@@ -56,6 +62,12 @@ def set_specific_lm_non_zero(data, lm_pairs_to_set):
     Raises:
         ValueError: If any of the provided (l, m) pairs are out of bounds for the input data.
     """
+    assert isinstance(lm_pairs_to_set, list), "lm_pairs_to_set must be a list"
+    for pair in lm_pairs_to_set:
+        assert isinstance(pair, tuple), "Each element in lm_pairs_to_set must be a tuple"
+        assert len(pair) == 2, "Each tuple in lm_pairs_to_set must contain two elements"
+        assert all(isinstance(x, int) for x in pair), "Each element in each tuple must be an integer"
+    
     # Get a zeros array of the same shape as the input data
     arr_filt = np.zeros(data.shape, dtype=complex)
 
