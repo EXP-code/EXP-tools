@@ -1,5 +1,47 @@
 import numpy as np
 
+def empirical_density_profile(pos, mass, nbins=500, rmin=0, rmax=600, log_space=False):
+    """
+    Computes the number density radial profile assuming all particles have the same mass.
+
+    Args:
+        pos (ndarray): array of particle positions in cartesian coordinates with shape (n,3).
+        mass (ndarray): array of particle masses with shape (n,).
+        nbins (int, optional): number of bins in the radial profile. Default is 500.
+        rmin (float, optional): minimum radius of the radial profile. Default is 0.
+        rmax (float, optional): maximum radius of the radial profile. Default is 600.
+        log_space (bool, optional): whether to use logarithmic binning. Default is False.
+
+    Returns:
+        tuple: a tuple containing the arrays of radius and density with shapes (nbins,) and (nbins,), respectively.
+
+    Raises:
+        ValueError: if pos and mass arrays have different lengths or if nbins is not a positive integer.
+    """
+    if len(pos) != len(mass):
+        raise ValueError("pos and mass arrays must have the same length")
+    if not isinstance(nbins, int) or nbins <= 0:
+        raise ValueError("nbins must be a positive integer")
+
+    # Compute radial distances
+    r_p = np.sqrt(np.sum(pos**2, axis=1))
+
+    # Compute bin edges and shell volumes
+    if log_space:
+        bins = np.logspace(np.log10(rmin), np.log10(rmax), nbins+1)
+    else:
+        bins = np.linspace(rmin, rmax, nbins+1)
+    V_shells = 4/3 * np.pi * (bins[1:]**3 - bins[:-1]**3)
+
+    # Compute density profile
+    density, _ = np.histogram(r_p, bins=bins, weights=mass)
+    density /= V_shells
+
+    # Compute bin centers and return profile
+    radius = 0.5 * (bins[1:] + bins[:-1])
+
+    return radius, density
+
 def makemodel(basis_type, func, dvals, rvals, M, 
         unit_physical=False, return_values=False,
         outfile='', plabel = '', verbose=True):
@@ -43,9 +85,8 @@ def makemodel(basis_type, func, dvals, rvals, M,
     
     # query out the density values
 
-    if basis_type == 'empirical':
-        dvals = func(rvals)
 
+    #vals = empirical_density_profile(rvals)
 
     # make the mass and potential arrays
     mvals = np.zeros(dvals.size)
@@ -60,13 +101,9 @@ def makemodel(basis_type, func, dvals, rvals, M,
 
     # evaluate mass enclosed and potential energy by recursion
     for indx in range(1, dvals.size):
-        mvals[indx] = mvals[indx-1] 
-                    + 2.0*np.pi*(rvals[indx-1]*rvals[indx-1]*dvals[indx-1] 
-                                 + rvals[indx]*rvals[indx]*dvals[indx])*(rvals[indx] - rvals[indx-1])
+        mvals[indx] = mvals[indx-1] + 2.0*np.pi*(rvals[indx-1]*rvals[indx-1]*dvals[indx-1] + rvals[indx]*rvals[indx]*dvals[indx])*(rvals[indx] - rvals[indx-1])
 
-        pwvals[indx] = pwvals[indx-1] 
-                     + 2.0*np.pi*(rvals[indx-1]*dvals[indx-1] 
-                                 + rvals[indx]*dvals[indx])*(rvals[indx] - rvals[indx-1]);
+        pwvals[indx] = pwvals[indx-1] + 2.0*np.pi*(rvals[indx-1]*dvals[indx-1] + rvals[indx]*dvals[indx])*(rvals[indx] - rvals[indx-1]);
     
     # evaluate potential (see theory document)
     pvals = -mvals/(rvals+1.e-10) - (pwvals[dvals.size-1] - pwvals)

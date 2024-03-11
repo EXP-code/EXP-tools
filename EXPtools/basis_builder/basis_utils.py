@@ -1,6 +1,6 @@
 import os, sys, pickle, pyEXP
 import numpy as np
-from . import  makemodel
+from EXPtools.basis_builder import makemodel
 
 def make_config(basis_id, numr, rmin, rmax, lmax, nmax, scale, 
                 modelname='', cachename='.slgrid_sph_cache'):
@@ -242,18 +242,15 @@ def makebasis(pos, mass, basis_model, config=None, basis_id='sphereSL', time=0,
     
     if os.path.isfile(modelname) == False:
         print("-> File model not found so we are computing one \n")
-        if empirical == True:
+        if basis_model == "empirical":
             print('-> Computing empirical model')
             rad, rho = empirical_density_profile(pos, mass, nbins=numr)
-        elif empirical == False:
-            makemodel.hernquist_halo()
-        
-        makemodel.Profiles(density_profile)
-        
-        R, D, M, P = makemodel.makemodel(rho, rvals=np.logspace(np.log10(rmin),
-            np.log10(rmax), numr), M=np.sum(mass), outfile=modelname, return_values=True)
+            R, D, M, P = makemodel('empirical', func=None, dvals=rho, rvals=np.logspace(np.log10(rmin),  np.log10(rmax), numr), M=np.sum(mass), outfile=modelname, return_values=True)
+        elif empirical == "Hernquist":
             print('-> Computing analytical Hernquist model')
-            R, D, M, P = makemodel.makemodel(hernquist_halo, 1, [scale], rvals=, pfile=modelname)
+            #makemodel.hernquist_halo()
+            #R, D, M, P = makemodel.makemodel(hernquist_halo, 1, [scale], rvals=, pfile=modelname)
+        
         print('-> Model computed: rmin={}, rmax={}, numr={}'.format(R[0], R[-1], len(R)))
     else:
         R, D, M, P  = np.loadtxt(modelname, skiprows=3, unpack=True) 
