@@ -1,7 +1,6 @@
 import os,  sys, pickle, pyEXP
 import numpy as np
 
-###Field computations for plotting###
 def make_basis_plot(basis, savefile=None, nsnap='mean', y=0.92, dpi=200):
     """
     Plots the potential of the basis functions for different values of l and n.
@@ -270,8 +269,7 @@ def slice_fields(basis, coefficients, time=0,
         return [fx.reshape(npoints, npoints), fy.reshape(npoints, npoints), fz.reshape(npoints, npoints)], xgrid
     
 
-def slice_3d_fields(basis, coefficients, time=0, 
-                 projection='XY', proj_plane=0, npoints=300, 
+def slice_3d_fields(basis, coefficients, time=0,  npoints=50, 
                  grid_limits=(-300, 300), prop='dens', monopole_only=False):
     """
     Plots a slice projection of the fields of a simulation.
@@ -280,8 +278,6 @@ def slice_3d_fields(basis, coefficients, time=0,
     basis (obj): object containing the basis functions for the simulation
     coefficients (obj): object containing the coefficients for the simulation
     time (float): the time at which to plot the fields
-    projection (str): the slice projection to plot. Can be 'XY', 'XZ', or 'YZ'.
-    proj_plane (float, optional): the value of the coordinate that is held constant in the slice projection
     npoints (int, optional): the number of grid points in each dimension
     grid_limits (tuple, optional): the limits of the grid in the x and y dimensions, in the form (x_min, x_max)
     prop (str, optional): the property to return. Can be 'dens' (density), 'pot' (potential), or 'force' (force).
@@ -304,10 +300,13 @@ def slice_3d_fields(basis, coefficients, time=0,
     pot0 = np.zeros_like(xg)
     rho = np.zeros_like(xg)
     pot = np.zeros_like(xg)
+    fx = np.zeros_like(xg)
+    fy = np.zeros_like(xg)
+    fz = np.zeros_like(xg)
     basis.set_coefs(coefficients.getCoefStruct(time))
 
     for k in range(0, N):
-        rho0[k], pot0[k], rho[k], pot[k], fx, fy, fz = basis.getFields(xg[k], yg[k], zg[k])
+        rho0[k], pot0[k], rho[k], pot[k], fx[k], fy[k], fz[k] = basis.getFields(xg[k], yg[k], zg[k])
     
     dens = rho.reshape(npoints, npoints, npoints)
     pot = pot.reshape(npoints, npoints, npoints)
@@ -326,4 +325,7 @@ def slice_3d_fields(basis, coefficients, time=0,
 
     if prop == 'force':
         return [fx.reshape(npoints, npoints, npoints), fy.reshape(npoints, npoints, npoints), fz.reshape(npoints, npoints, npoints)], xgrid
+    
+
+
     

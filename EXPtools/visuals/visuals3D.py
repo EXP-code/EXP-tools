@@ -4,11 +4,13 @@ import k3d
 
 def field3Dcontour(field, contour_range, contour_name, size, **kwargs):
     """
-    # TODO: Add time-dependent 
     
-    field
+    field: numpy.ndarray
+        shape(t, N, N, N), where t is the time axis, N are the spatial axis.
     
-    volume_ranges
+    contour_ranges: list
+        values in percentage of the contour levels. e.g [0.5, 0.75] means
+        contours at the 50% and 75% level.  
     
     volume_names 
     
@@ -17,10 +19,13 @@ def field3Dcontour(field, contour_range, contour_name, size, **kwargs):
     
     """
     
-    
+    field_max = np.max(np.abs(field))
+    #field_min = np.min(field)
+
+
     volume =  k3d.volume(field.astype(np.float32), 
                         alpha_coef=1.0,
-                        color_range=contour_range, 
+                        color_range=contour_range, #*field_max, 
                         color_map=(np.array(k3d.colormaps.paraview_color_maps.Cool_to_Warm_Extended).reshape(-1,4) 
                    * np.array([1,1.0,1.0,1.0])).astype(np.float32),
                         name=contour_name)
@@ -31,9 +36,9 @@ def field3Dcontour(field, contour_range, contour_name, size, **kwargs):
            0.74537706, 0.9915    , 1.        , 0.        ]
 
 
-    volume.transform.bounds = [-size[0]/2, size[0]/2,
-                               -size[1]/2, size[1]/2,
-                               -size[2]/2, size[2]/2]
+    volume.transform.bounds = [-size[0], size[0],
+                               -size[1], size[1],
+                               -size[2], size[2]]
     
     if 'alpha' in kwargs.keys():
         volume.alpha_coef = kwargs['alpha']
