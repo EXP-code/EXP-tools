@@ -1,7 +1,6 @@
 import os,  sys, pickle, pyEXP
 import numpy as np
 
-###Field computations for plotting###
 def make_basis_plot(basis, savefile=None, nsnap='mean', y=0.92, dpi=200):
     """
     Plots the potential of the basis functions for different values of l and n.
@@ -204,7 +203,130 @@ def return_fields_in_grid(basis, coefficients, times=[0],
         elif projection == 'YZ':
             pmin  = [proj_plane,  -grid_lim, -grid_lim]
             pmax  = [proj_plane, grid_lim, grid_lim]
-            grid  = [0, npoints, npoints]
-        
-        field_gen = pyEXP.field.FieldGenerator(times, pmin, pmax, grid)
-        return field_gen.slices(basis, coefficients), xgrid
+
+    
+    field_gen = pyEXP.field.FieldGenerator(times, pmin, pmax, grid)
+
+    return field_gen.volumes(basis, coefficients), xgrid
+
+def slice_fields(basis, coefficients, time=0, 
+                 projection='XY', proj_plane=0, npoints=300, 
+                 grid_limits=(-300, 300), prop='dens', monopole_only=False):
+    """
+    Plots a slice projection of the fields of a simulation.
+
+    Args:
+    basis (obj): object containing the basis functions for the simulation
+    coefficients (obj): object containing the coefficients for the simulation
+    time (float): the time at which to plot the fields
+    projection (str): the slice projection to plot. Can be 'XY', 'XZ', or 'YZ'.
+    proj_plane (float, optional): the value of the coordinate that is held constant in the slice projection
+    npoints (int, optional): the number of grid points in each dimension
+    grid_limits (tuple, optional): the limits of the grid in the x and y dimensions, in the form (x_min, x_max)
+    prop (str, optional): the property to return. Can be 'dens' (density), 'pot' (potential), or 'force' (force).
+    monopole_only (bool, optional): whether to return the monopole component in the returned property value.
+
+    Returns:
+    array or list: the property specified by `prop`. If `prop` is 'force', a list of the x, y, and z components of the force is returned.
+                    Also returns the grid used to compute slice fields. 
+    """
+    x = np.linspace(grid_limits[0], grid_limits[1], npoints)
+    xgrid = np.meshgrid(x, x)
+    xg = xgrid[0].flatten()
+    yg = xgrid[1].flatten()
+
+    
+    if projection not in ['XY', 'XZ', 'YZ']:
+        raise ValueError("Invalid projection specified. Possible values are 'XY', 'XZ', and 'YZ'.")
+
+    N = len(xg)
+    rho0 = np.zeros_like(xg)
+    pot0 = np.zeros_like(xg)
+    rho = np.zeros_like(xg)
+    pot = np.zeros_like(xg)
+    basis.set_coefs(coefficients.getCoefStruct(time))
+
+    for k in range(0, N):
+        if projection == 'XY':
+            rho0[k], pot0[k], rho[k], pot[k], fx, fy, fz = basis.getFields(xg[k], yg[k], proj_plane)
+        elif projection == 'XZ':
+            rho0[k], pot0[k], rho[k], pot[k], fx, fy, fz = basis.getFields(xg[k], proj_plane, yg[k])
+        elif projection == 'YZ':
+            rho0[k], pot0[k], rho[k], pot[k], fx, fy, fz = basis.getFields(proj_plane, xg[k], yg[k])
+    
+    dens = rho.reshape(npoints, npoints)
+    pot = pot.reshape(npoints, npoints)
+    dens0 = rho0.reshape(npoints, npoints)
+    pot0 = pot0.reshape(npoints, npoints)
+
+    if prop == 'dens':
+        if monopole_only:
+            return dens0
+        return dens0, dens, xgrid
+
+    if prop == 'pot':
+        if monopole_only:
+            return pot0
+        return pot0, pot, xgrid
+
+    if prop == 'force':
+        return [fx.reshape(npoints, npoints), fy.reshape(npoints, npoints), fz.reshape(npoints, npoints)], xgrid
+    
+
+def slice_3d_fields(basis, coefficients, time=0,  npoints=50, 
+                 grid_limits=(-300, 300), prop='dens', monopole_only=False):
+    """
+    Plots a slice projection of the fields of a simulation.
+
+    Args:
+    basis (obj): object containing the basis functions for the simulation
+    coefficients (obj): object containing the coefficients for the simulation
+    time (float): the time at which to plot the fields
+    npoints (int, optional): the number of grid points in each dimension
+    grid_limits (tuple, optional): the limits of the grid in the x and y dimensions, in the form (x_min, x_max)
+    prop (str, optional): the property to return. Can be 'dens' (density), 'pot' (potential), or 'force' (force).
+    monopole_only (bool, optional): whether to return the monopole component in the returned property value.
+
+    Returns:
+    array or list: the property specified by `prop`. If `prop` is 'force', a list of the x, y, and z components of the force is returned.
+                    Also returns the grid used to compute slice fields. 
+    """
+    x = np.linspace(grid_limits[0], grid_limits[1], npoints)
+    xgrid = np.meshgrid(x, x, x)
+    xg = xgrid[0].flatten()
+    yg = xgrid[1].flatten() 
+    zg = xgrid[2].flatten()
+  
+    
+
+    N = len(xg)
+    rho0 = np.zeros_like(xg)
+    pot0 = np.zeros_like(xg)
+    rho = np.zeros_like(xg)
+    pot = np.zeros_like(xg)
+    fx = np.zeros_like(xg)
+    fy = np.zeros_like(xg)
+    fz = np.zeros_like(xg)
+    basis.set_coefs(coefficients.getCoefStruct(time))
+
+    for k in range(0, N):
+        rho0[k], pot0[k], rho[k], pot[k], fx[k], fy[k], fz[k] = basis.getFields(xg[k], yg[k], zg[k])
+    
+    dens = rho.reshape(npoints, npoints, npoints)
+    pot = pot.reshape(npoints, npoints, npoints)
+    dens0 = rho0.reshape(npoints, npoints, npoints)
+    pot0 = pot0.reshape(npoints, npoints, npoints)
+
+    if prop == 'dens':
+        if monopole_only:
+            return dens0
+        return dens0, dens, xgrid
+
+    if prop == 'pot':
+        if monopole_only:
+            return pot0
+        return pot0, pot, xgrid
+
+    if prop == 'force':
+        return [fx.reshape(npoints, npoints, npoints), fy.reshape(npoints, npoints, npoints), fz.reshape(npoints, npoints, npoints)], xgrid
+    
