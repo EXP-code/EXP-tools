@@ -8,10 +8,11 @@ from scipy.spatial.transform import Rotation as Rot
 class ICHernquist:
     """
     Class to sample the positions of a Hernquist halo
+    initialized with the number of particles in the halo
     """
 
     def __init__(self, size):
-        self.size = size
+        self.size = int(size)
     
     def sample_profile(self):
         """
