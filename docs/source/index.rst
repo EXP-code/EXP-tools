@@ -6,12 +6,15 @@
 Welcome to EXP tools' documentation!
 ====================================
 
+Contents
+========
+
 .. toctree::
    :maxdepth: 1
-   :caption: Contents:
 
    installation 
    user_guide
+   reference
    contributing
   
 Contributors
