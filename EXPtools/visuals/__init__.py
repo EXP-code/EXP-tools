@@ -5,4 +5,5 @@ from .visualize import spherical_avg_prop
 from .visualize import return_fields_in_grid
 from .visualize import slice_fields
 from .visualize import slice_3d_fields
+from .visualize import spherical_slice
 from .visuals3D import field3Drender

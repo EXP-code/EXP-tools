@@ -1,5 +1,6 @@
 import os, sys, pickle, pyEXP
 import numpy as np
+from scipy.linalg import norm
 from EXPtools.basis_builder import makemodel
 
 def make_config(basis_id, numr, rmin, rmax, lmax, nmax, scale, 
@@ -77,136 +78,12 @@ def empirical_density_profile(pos, mass, nbins=500, rmin=0, rmax=600, log_space=
 
     # Compute bin centers and return profile
     radius = 0.5 * (bins[1:] + bins[:-1])
-    return radius, density
+    return density
 
-def make_exp_basis_table(radius, density, outfile='', plabel='', 
-                          verbose=True, physical_units=True, return_values=False):
-    
-    """
-    Create a table of basis functions for an exponential density profile, compatible with EXP.
-
-    Parameters:
-    -----------
-    radius : array-like
-        Array of sampled radius points.
-    density : array-like
-        Array of density values at radius points.
-    outfile : str, optional
-        The name of the output file. If not provided, the file will not be written.
-    plabel : str, optional
-        A comment string to add to the output file.
-    verbose : bool, optional
-        Whether to print scaling factors and other details during execution.
-    physical_units : bool, optional
-        Whether to use physical units (True) or normalized units (False) in the output file.
-    return_values : bool, optional
-        Whether to return the radius, density, mass, and potential arrays (True) or not (False).
-
-    Returns:
-    --------
-    If return_values is True:
-        radius : array-like
-            The radius values.
-        density : array-like
-            The density values.
-        mass : array-like
-            The mass enclosed at each radius.
-        potential : array-like
-            The potential energy at each radius.
-    If return_values is False (default):
-        None
-
-    Notes:
-    ------
-    This function assumes an exponential density profile:
-
-        rho(r) = rho_0 * exp(-r/a)
-
-    where rho_0 and a are constants.
-
-    The table of basis functions is used by EXP to create a density profile.
-
-    Reference:
-    ----------
-    https://gist.github.com/michael-petersen/ec4f20641eedac8f63ec409c9cc65ed7
-    """    
-    
-
-    # make the mass and potential arrays
-    rvals, dvals = radius, density 
-    mvals = np.zeros(density.size)
-    pvals = np.zeros(density.size)
-    pwvals = np.zeros(density.size)
-
-    M = 1.
-    R = np.nanmax(rvals)
-
-
-    # initialise the mass enclosed an potential energy
-    mvals[0] = 1.e-15
-    pwvals[0] = 0.
-
-    # evaluate mass enclosed and potential energy by recursion
-    for indx in range(1, dvals.size):
-        mvals[indx] = mvals[indx-1] +\
-          2.0*np.pi*(rvals[indx-1]*rvals[indx-1]*dvals[indx-1] +\
-                 rvals[indx]*rvals[indx]*dvals[indx])*(rvals[indx] - rvals[indx-1]);
-        pwvals[indx] = pwvals[indx-1] + \
-          2.0*np.pi*(rvals[indx-1]*dvals[indx-1] + rvals[indx]*dvals[indx])*(rvals[indx] - rvals[indx-1]);
-
-    # evaluate potential (see theory document)
-    pvals = -mvals/(rvals+1.e-10) - (pwvals[dvals.size-1] - pwvals)
-
-    # get the maximum mass and maximum radius
-    M0 = mvals[dvals.size-1]
-    R0 = rvals[dvals.size-1]
-
-    # compute scaling factors
-    Beta = (M/M0) * (R0/R)
-    Gamma = np.sqrt( (M0*R0)/(M*R) ) * (R0/R)
-    if verbose:
-        print("! Scaling:  R=",R,"  M=",M)
-
-    rfac = np.power(Beta,-0.25) * np.power(Gamma,-0.5);
-    dfac = np.power(Beta,1.5) * Gamma;
-    mfac = np.power(Beta,0.75) * np.power(Gamma,-0.5);
-    pfac = Beta;
-
-    if verbose:
-        print(rfac,dfac,mfac,pfac)
-
-    # save file if desired
-    if outfile != '':
-        f = open(outfile,'w')
-        print('! ', plabel, file=f)
-        print('! R    D    M    P',file=f)
-
-        print(rvals.size,file=f)
-        
-        if physical_units:
-            for indx in range(0,rvals.size):
-                print('{0} {1} {2} {3}'.format(rvals[indx],\
-                                              dvals[indx],\
-                                              mvals[indx],\
-                                              pvals[indx]),file=f)
-        else:
-            for indx in range(0,rvals.size):
-                print('{0} {1} {2} {3}'.format(rfac*rvals[indx],\
-                  dfac*dvals[indx],\
-                  mfac*mvals[indx],\
-                  pfac*pvals[indx]),file=f)
-
-        f.close()
-    
-    if return_values:
-        if physical_units:
-            return rvals, dvals, mvals, pvals
-
-        return rvals*rfac, dfac*dvals, mfac*mvals, pfac*pvals
 
     
 def makebasis(pos, mass, basis_model, config=None, basis_id='sphereSL', time=0, 
-               numr=500, rmin=0.61, rmax=599, lmax=4, nmax=20, scale=22.5, 
+               numr=500, rmin=0.61, rmax=599, lmax=4, nmax=20, scale=1, 
                norm_mass_coef = True, modelname='dens_table.txt', cachename='.slgrid_sph_cache', add_coef = False, coef_file=''):
     """
     Create a BFE expansion for a given set of particle positions and masses.
@@ -245,12 +122,21 @@ def makebasis(pos, mass, basis_model, config=None, basis_id='sphereSL', time=0,
         if basis_model == "empirical":
             print('-> Computing empirical model')
             rad, rho = empirical_density_profile(pos, mass, nbins=numr)
-            R, D, M, P = makemodel('empirical', func=None, dvals=rho, rvals=np.logspace(np.log10(rmin),  np.log10(rmax), numr), M=np.sum(mass), outfile=modelname, return_values=True)
-        elif empirical == "Hernquist":
+            R, D, M, P = makemodel(func=empirical_density_profile, M=np.sum(mass), funcargs=[0], rvals=np.logspace(np.log10(rmin),  np.log10(rmax), numr), pfile=modelname)
+        elif basis_model == "Hernquist":
             print('-> Computing analytical Hernquist model')
             #makemodel.hernquist_halo()
-            #R, D, M, P = makemodel.makemodel(hernquist_halo, 1, [scale], rvals=, pfile=modelname)
+            #R, D, M, P = makemodel.makemodel(hernquist_halo, 1, [scale], rc=0, alpha=1.0, beta=2.0)
         
+        elif basis_model == "powerlaw":
+            print('-> Computing analytical Hernquist model')
+            #makemodel.hernquist_halo()
+            rbins = np.logspace(np.log10(rmin), np.log10(rmax), numr+1)
+            
+            R, D, M, P = makemodel.makemodel(makemodel.powerhalo, M=np.sum(mass),
+                                             funcargs=[1, 0, 1.0, 2.0], rvals = rbins,
+                                             pfile=modelname)
+            
         print('-> Model computed: rmin={}, rmax={}, numr={}'.format(R[0], R[-1], len(R)))
     else:
         R, D, M, P  = np.loadtxt(modelname, skiprows=3, unpack=True) 

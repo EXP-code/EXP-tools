@@ -1,3 +1,7 @@
+import numpy as np
+
+
+
 def remove_terms(original_coefficients, n, l, m):
     """
     Remove coefficients 
@@ -18,3 +22,8 @@ def remove_terms(original_coefficients, n, l, m):
         copy_coeffcients.setMatrix(mat=coefs_matrix[:,:, t], time=t_snaps[t])
     
     return copy_coeffcients
+
+
+# Plot phase of coefficients! 
+
+# 
