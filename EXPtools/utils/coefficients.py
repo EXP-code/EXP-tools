@@ -1,3 +1,5 @@
+import numpy as np
+
 def remove_terms(original_coefficients, n, l, m):
     """
     Remove coefficients 
