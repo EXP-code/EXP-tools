@@ -320,20 +320,29 @@ def slice_fields(basis, coefficients, time=0,
     pot0 = np.zeros_like(xg)
     rho = np.zeros_like(xg)
     pot = np.zeros_like(xg)
-    basis.set_coefs(coefficients.getCoefStruct(time))
+    fx = np.zeros_like(xg)
+    fy = np.zeros_like(xg)
+    fz = np.zeros_like(xg)
+    try:
+        basis.set_coefs(coefficients.getCoefStruct(time))
+    except AttributeError:
+        basis.set_coefs(coefficients)
 
     for k in range(0, N):
         if projection == 'XY':
-            rho0[k], pot0[k], rho[k], pot[k], fx, fy, fz = basis.getFields(xg[k], yg[k], proj_plane)
+            rho0[k], pot0[k], rho[k], pot[k], fx[k], fy[k], fz[k] = basis.getFields(xg[k], yg[k], proj_plane)
         elif projection == 'XZ':
-            rho0[k], pot0[k], rho[k], pot[k], fx, fy, fz = basis.getFields(xg[k], proj_plane, yg[k])
+            rho0[k], pot0[k], rho[k], pot[k], fx[k], fy[k], fz[k] = basis.getFields(xg[k], proj_plane, yg[k])
         elif projection == 'YZ':
-            rho0[k], pot0[k], rho[k], pot[k], fx, fy, fz = basis.getFields(proj_plane, xg[k], yg[k])
+            rho0[k], pot0[k], rho[k], pot[k], fx[k], fy[k], fz[k] = basis.getFields(proj_plane, xg[k], yg[k])
     
     dens = rho.reshape(npoints, npoints)
     pot = pot.reshape(npoints, npoints)
     dens0 = rho0.reshape(npoints, npoints)
     pot0 = pot0.reshape(npoints, npoints)
+    fx = fx.reshape(npoints,npoints)
+    fy = fy.reshape(npoints,npoints)
+    fz = fz.reshape(npoints,npoints)
 
     if prop == 'dens':
         if monopole_only:
@@ -346,7 +355,7 @@ def slice_fields(basis, coefficients, time=0,
         return pot0, pot, xgrid
 
     if prop == 'force':
-        return [fx.reshape(npoints, npoints), fy.reshape(npoints, npoints), fz.reshape(npoints, npoints)], xgrid
+        return [fx, fy, fz], xgrid
     
 
 def slice_3d_fields(basis, coefficients, time=0,  npoints=50, 
