@@ -138,6 +138,48 @@ def spherical_avg_prop(basis, coefficients, time=0, radius=np.linspace(0.1, 600,
 
     return np.array(field), radius
 
+
+def make_grid(gridtype, npoints, rgrid, representation='cartesian'):
+    """
+    Make a variety of grids in different coordinate representations
+
+    Parameters
+    ----------
+    gridtype:
+    npoints:
+    rgrid:
+    representation:
+
+
+    Returns:
+    --------
+    coordinates 
+    
+    """
+    
+    if gridtype == 'spherical':
+        arcostheta = np.linspace(-1, 1, int(npoints))
+        phi = np.linspace(-np.pi, np.pi, int(npoints))
+        theta, phi = np.meshgrid(np.arccos(arcostheta)-np.pi/2., phi)
+
+        if representation == 'cartesian':
+            x = rgrid  * np.sin(theta) * np.cos(phi)
+            y = rgrid  * np.sin(theta) * np.sin(phi)
+            z = rgrid  * np.cos(theta) 
+            ## TODO: fix this return to allow the user to chose what to return
+            return np.array([x, y, z]), theta, phi
+        
+        elif representation == 'spherical':
+            return np.array([theta, phi])
+  
+    else:
+        print('gridtype {} not implemented'.format(gridtype))  
+   
+
+
+
+
+
 def return_fields_in_grid(basis, coefficients, times=[0], 
                        projection='3D', proj_plane=0, 
                        grid_lim=300, npoints=150,):
@@ -208,6 +250,40 @@ def return_fields_in_grid(basis, coefficients, times=[0],
     field_gen = pyEXP.field.FieldGenerator(times, pmin, pmax, grid)
 
     return field_gen.volumes(basis, coefficients), xgrid
+
+
+def spherical_slice(basis, coefficients, npoints, rgrid):
+    grid, theta_grid, phi_grid = make_grid(gridtype='spherical', npoints=npoints, 
+                                    rgrid=rgrid, representation='cartesian')
+    
+    xg = grid[0].flatten()
+    yg = grid[1].flatten()
+    zg = grid[2].flatten()
+
+    ngrid = int(npoints**2)
+    assert len(xg) == ngrid
+
+
+    rho0 = np.zeros_like(xg)
+    pot0 = np.zeros_like(xg)
+    rho = np.zeros_like(xg)
+    pot = np.zeros_like(xg)
+    fx = np.zeros_like(xg)
+    fy = np.zeros_like(xg)
+    fz = np.zeros_like(xg)
+    
+    for k in range(ngrid):
+        rho0[k], pot0[k], rho[k], pot[k], fx[k], fy[k], fz[k] = basis.getFields(xg[k], yg[k], zg[k])
+
+    dens = rho.reshape(npoints, npoints)
+    dens0 = rho0.reshape(npoints, npoints)
+
+
+    phi= pot.reshape(npoints, npoints)
+    phi0 = pot0.reshape(npoints, npoints)
+
+
+    return  dens, dens0, phi, phi0, [theta_grid, phi_grid]
 
 def slice_fields(basis, coefficients, time=0, 
                  projection='XY', proj_plane=0, npoints=300, 
