@@ -246,7 +246,7 @@ def makebasis(pos, mass, basis_model, config=None, basis_id='sphereSL', time=0,
             print('-> Computing empirical model')
             rad, rho = empirical_density_profile(pos, mass, nbins=numr)
             R, D, M, P = makemodel('empirical', func=None, dvals=rho, rvals=np.logspace(np.log10(rmin),  np.log10(rmax), numr), M=np.sum(mass), outfile=modelname, return_values=True)
-        elif empirical == "Hernquist":
+        elif basis_model == "Hernquist":
             print('-> Computing analytical Hernquist model')
             #makemodel.hernquist_halo()
             #R, D, M, P = makemodel.makemodel(hernquist_halo, 1, [scale], rvals=, pfile=modelname)
