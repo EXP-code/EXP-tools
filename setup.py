@@ -7,4 +7,5 @@ setuptools.setup(
         author_email="ngaravito@flatironinstitute.org",
         description="Analysis tools for EXP and other BFE packages",
         packages=["EXPtools", "EXPtools/basis_builder/", "EXPtools/visuals", "EXPtools/utils"],
+	install_requires=["healpy"]
         )
