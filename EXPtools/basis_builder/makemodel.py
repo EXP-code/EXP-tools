@@ -1,4 +1,5 @@
 import numpy as np
+import scipy 
 
 def empirical_density_profile(pos, mass, nbins=500, rmin=0, rmax=600, log_space=False):
     """
