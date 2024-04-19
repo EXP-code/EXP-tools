@@ -96,7 +96,7 @@ def powerhalorolloff(r, rs=1., rc=0., alpha=1., beta=1.e-7):
     dens = 1./(((ra+rc/rs)**alpha)*((1+ra)**beta))
     rtrunc = 25*rs
     wtrunc = rtrunc*0.2
-    rolloff = 0.5 - 0.5*special.erf((r-rtrunc)/wtrunc)
+    rolloff = 0.5 - 0.5*scipy.special.erf((r-rtrunc)/wtrunc)
     return dens*rolloff
 
 
