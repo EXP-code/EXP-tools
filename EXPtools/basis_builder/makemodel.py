@@ -1,7 +1,7 @@
 import numpy as np
 import scipy 
 
-def empirical_density_profile(pos, mass, nbins=500, rmin=0, rmax=600, log_space=False):
+def empirical_density_profile(rbins, pos, mass):
     """
     Computes the number density radial profile assuming all particles have the same mass.
 
@@ -21,27 +21,22 @@ def empirical_density_profile(pos, mass, nbins=500, rmin=0, rmax=600, log_space=
     """
     if len(pos) != len(mass):
         raise ValueError("pos and mass arrays must have the same length")
-    if not isinstance(nbins, int) or nbins <= 0:
-        raise ValueError("nbins must be a positive integer")
+    if not isinstance(len(rbins), int) or len(rbins) <= 0:
+        raise ValueError("rbins must be a positive integer")
 
     # Compute radial distances
     r_p = np.sqrt(np.sum(pos**2, axis=1))
 
-    # Compute bin edges and shell volumes
-    if log_space:
-        bins = np.logspace(np.log10(rmin), np.log10(rmax), nbins+1)
-    else:
-        bins = np.linspace(rmin, rmax, nbins+1)
-    V_shells = 4/3 * np.pi * (bins[1:]**3 - bins[:-1]**3)
+    V_shells = 4/3 * np.pi * (rbins[1:]**3 - rbins[:-1]**3)
 
     # Compute density profile
-    density, _ = np.histogram(r_p, bins=bins, weights=mass)
+    density, _ = np.histogram(r_p, bins=rbins+1, weights=mass)
     density /= V_shells
 
     # Compute bin centers and return profile
-    radius = 0.5 * (bins[1:] + bins[:-1])
+    #radius = 0.5 * (rbins[1:] + rbins[:-1])
 
-    return radius, density
+    return density
 
 
 
@@ -73,7 +68,7 @@ def powerhalo(r, rs=1.,rc=0.,alpha=1.,beta=1.e-7):
     return 1./(((ra+rc/rs)**alpha)*((1+ra)**beta))
     
  
-def powerhalorolloff(r,rs=1.,rc=0.,alpha=1.,beta=1.e-7):
+def powerhalorolloff(r, rs=1., rc=0., alpha=1., beta=1.e-7):
     """return generic twopower law distribution with an erf rolloff
     
     inputs
@@ -105,11 +100,11 @@ def powerhalorolloff(r,rs=1.,rc=0.,alpha=1.,beta=1.e-7):
     return dens*rolloff
 
 
-def plummer_density(radius,scale_radius=1.0,mass=1.0,astronomicalG=1.0):
+def plummer_density(radius, scale_radius=1.0, mass=1.0, astronomicalG=1.0):
     """basic plummer density profile"""
     return ((3.0*mass)/(4*np.pi))*(scale_radius**2.)*((scale_radius**2 + radius**2)**(-2.5))
 
-def twopower_density_withrolloff(r,a,alpha,beta,rcen,wcen):
+def twopower_density_withrolloff(r, a, alpha, beta, rcen, wcen):
     """a twopower density profile"""
     ra = r/a
     prefac = 0.5*(1.-scipy.special.erf((ra-rcen)/wcen))
@@ -122,7 +117,7 @@ def hernquist_halo(r, a):
 
 ## Teporary Makemodel function that will be integrated into pyEXP
 
-def makemodel(func, M,funcargs,rvals = 10.**np.linspace(-2.,4.,2000),pfile='',plabel = '',verbose=True):
+def makemodel(func, M, funcargs, rvals = 10.**np.linspace(-2.,4.,2000), pfile='', plabel = '',verbose=True):
     """make an EXP-compatible spherical basis function table
     
     inputs
