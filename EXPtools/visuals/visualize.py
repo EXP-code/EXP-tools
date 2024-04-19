@@ -1,5 +1,6 @@
 import os,  sys, pickle, pyEXP
 import numpy as np
+import matplotlib.pyplot as plt
 
 def make_basis_plot(basis, savefile=None, nsnap='mean', y=0.92, dpi=200):
     """
@@ -29,7 +30,6 @@ def make_basis_plot(basis, savefile=None, nsnap='mean', y=0.92, dpi=200):
     r = np.power(10.0, r)
 
     # Create subplots and plot potential for each l and n
-    import matplotlib.pyplot as plt
     fig, ax = plt.subplots(4, 5, figsize=(6,6), dpi=dpi, 
                             sharex='col', sharey='row')
     plt.subplots_adjust(wspace=0, hspace=0)
@@ -139,7 +139,7 @@ def spherical_avg_prop(basis, coefficients, time=0, radius=np.linspace(0.1, 600,
     return np.array(field), radius
 
 
-def make_grid(gridtype, npoints, rgrid, representation='cartesian'):
+def make_grid(gridtype, gridspecs, rgrid, representation='cartesian'):
     """
     Make a variety of grids in different coordinate representations
 
@@ -158,19 +158,19 @@ def make_grid(gridtype, npoints, rgrid, representation='cartesian'):
     """
     
     if gridtype == 'spherical':
-        arcostheta = np.linspace(-1, 1, int(npoints))
-        phi = np.linspace(-np.pi, np.pi, int(npoints))
-        theta, phi = np.meshgrid(np.arccos(arcostheta)-np.pi/2., phi)
+        arcostheta = np.linspace(-1, 1, gridspecs['theta_bins'])
+        phi = np.linspace(-np.pi, np.pi, gridspecs['phi_bins'])
+        theta_mesh, phi_mesh = np.meshgrid(np.arccos(arcostheta)-np.pi/2., phi)
 
         if representation == 'cartesian':
-            x = rgrid  * np.sin(theta) * np.cos(phi)
-            y = rgrid  * np.sin(theta) * np.sin(phi)
-            z = rgrid  * np.cos(theta) 
+            x = rgrid  * np.sin(theta_mesh) * np.cos(phi_mesh)
+            y = rgrid  * np.sin(theta_mesh) * np.sin(phi_mesh)
+            z = rgrid  * np.cos(theta_mesh) 
             ## TODO: fix this return to allow the user to chose what to return
-            return np.array([x, y, z]), theta, phi
+            return np.array([x, y, z]), theta_mesh, phi_mesh
         
         elif representation == 'spherical':
-            return np.array([theta, phi])
+            return np.array([theta_mesh, phi_mesh])
   
     else:
         print('gridtype {} not implemented'.format(gridtype))  
@@ -252,15 +252,18 @@ def return_fields_in_grid(basis, coefficients, times=[0],
     return field_gen.volumes(basis, coefficients), xgrid
 
 
-def spherical_slice(basis, coefficients, npoints, rgrid):
-    grid, theta_grid, phi_grid = make_grid(gridtype='spherical', npoints=npoints, 
+def spherical_slice(basis, coefficients, gridspecs, rgrid):
+    grid, theta_grid, phi_grid = make_grid(gridtype='spherical', gridspecs=gridspecs, 
                                     rgrid=rgrid, representation='cartesian')
     
     xg = grid[0].flatten()
     yg = grid[1].flatten()
     zg = grid[2].flatten()
 
-    ngrid = int(npoints**2)
+    theta_bins = gridspecs['theta_bins']
+    phi_bins = gridspecs['phi_bins']
+
+    ngrid = int(theta_bins*phi_bins)
     assert len(xg) == ngrid
 
 
@@ -275,12 +278,12 @@ def spherical_slice(basis, coefficients, npoints, rgrid):
     for k in range(ngrid):
         rho0[k], pot0[k], rho[k], pot[k], fx[k], fy[k], fz[k] = basis.getFields(xg[k], yg[k], zg[k])
 
-    dens = rho.reshape(npoints, npoints)
-    dens0 = rho0.reshape(npoints, npoints)
+    dens = rho.reshape(phi_bins, theta_bins)
+    dens0 = rho0.reshape(phi_bins, theta_bins)
 
 
-    phi= pot.reshape(npoints, npoints)
-    phi0 = pot0.reshape(npoints, npoints)
+    phi= pot.reshape(phi_bins, theta_bins)
+    phi0 = pot0.reshape(phi_bins, theta_bins)
 
 
     return  dens, dens0, phi, phi0, [theta_grid, phi_grid]
