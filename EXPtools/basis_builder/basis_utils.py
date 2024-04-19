@@ -39,51 +39,9 @@ def make_config(basis_id, numr, rmin, rmax, lmax, nmax, scale,
     config += '...\n'
     return config
 
-def empirical_density_profile(pos, mass, nbins=500, rmin=0, rmax=600, log_space=False):
-    """
-    Computes the number density radial profile assuming all particles have the same mass.
-
-    Args:
-        pos (ndarray): array of particle positions in cartesian coordinates with shape (n,3).
-        mass (ndarray): array of particle masses with shape (n,).
-        nbins (int, optional): number of bins in the radial profile. Default is 500.
-        rmin (float, optional): minimum radius of the radial profile. Default is 0.
-        rmax (float, optional): maximum radius of the radial profile. Default is 600.
-        log_space (bool, optional): whether to use logarithmic binning. Default is False.
-
-    Returns:
-        tuple: a tuple containing the arrays of radius and density with shapes (nbins,) and (nbins,), respectively.
-
-    Raises:
-        ValueError: if pos and mass arrays have different lengths or if nbins is not a positive integer.
-    """
-    if len(pos) != len(mass):
-        raise ValueError("pos and mass arrays must have the same length")
-    if not isinstance(nbins, int) or nbins <= 0:
-        raise ValueError("nbins must be a positive integer")
-
-    # Compute radial distances
-    r_p = np.sqrt(np.sum(pos**2, axis=1))
-
-    # Compute bin edges and shell volumes
-    if log_space:
-        bins = np.logspace(np.log10(rmin), np.log10(rmax), nbins+1)
-    else:
-        bins = np.linspace(rmin, rmax, nbins+1)
-    V_shells = 4/3 * np.pi * (bins[1:]**3 - bins[:-1]**3)
-
-    # Compute density profile
-    density, _ = np.histogram(r_p, bins=bins, weights=mass)
-    density /= V_shells
-
-    # Compute bin centers and return profile
-    radius = 0.5 * (bins[1:] + bins[:-1])
-    return density
-
-
     
 def makebasis(pos, mass, basis_model, config=None, basis_id='sphereSL', time=0, 
-               numr=500, rmin=0.61, rmax=599, lmax=4, nmax=20, scale=1, 
+               nbins=500, rmin=0.61, rmax=599, log_space=True, lmax=4, nmax=20, scale=1, 
                norm_mass_coef = True, modelname='dens_table.txt', cachename='.slgrid_sph_cache', add_coef = False, coef_file=''):
     """
     Create a BFE expansion for a given set of particle positions and masses.
@@ -99,7 +57,7 @@ def makebasis(pos, mass, basis_model, config=None, basis_id='sphereSL', time=0,
                                              and a configuration object will be created automatically.
     basis_id (str, optional): The type of basis set to be used. Default is 'sphereSL'.
     time (float, optional): The time at which the expansion is being computed. Default is 0.
-    numr (int, optional): The number of radial grid points in the basis set. Default is 200.
+    nbins (int, optional): The number of radial grid points in the basis set. Default is 200.
     rmin (float, optional): The minimum radius of the basis set. Default is 0.61.
     rmax (float, optional): The maximum radius of the basis set. Default is 599.
     lmax (int, optional): The maximum harmonic order in the basis set. Default is 4.
@@ -117,24 +75,37 @@ def makebasis(pos, mass, basis_model, config=None, basis_id='sphereSL', time=0,
            an instance of pyEXP.coefs.Coefs.
     """
     
+
+    if log_space == True:
+        rbins =  np.logspace(np.log10(rmin), np.log10(rmax), nbins+1)
+    elif log_space == False:
+        rbins = np.linspace(rmin, rmax, nbins+1)
+
     if os.path.isfile(modelname) == False:
         print("-> File model not found so we are computing one \n")
+
         if basis_model == "empirical":
             print('-> Computing empirical model')
-            rad, rho = empirical_density_profile(pos, mass, nbins=numr)
-            R, D, M, P = makemodel(func=empirical_density_profile, M=np.sum(mass), funcargs=[0], rvals=np.logspace(np.log10(rmin),  np.log10(rmax), numr), pfile=modelname)
+            #rho = empirical_density_profile(pos, mass, rbins)
+            
+            R, D, M, P = makemodel.makemodel(makemodel.empirical_density_profile, M=np.sum(mass),
+                                   funcargs=[pos, mass], rvals=rbins)
+        
         elif basis_model == "Hernquist":
             print('-> Computing analytical Hernquist model')
-            #makemodel.hernquist_halo()
-            #R, D, M, P = makemodel.makemodel(hernquist_halo, 1, [scale], rc=0, alpha=1.0, beta=2.0)
+            R, D, M, P = makemodel.makemodel(makemodel.powerhalo, M=np.sum(mass),
+                                             funcargs=[1, 0, 1.0, 3.0], rvals = rbins,
+                                             pfile=modelname)
         
-        elif basis_model == "powerlaw":
-            print('-> Computing analytical Hernquist model')
-            #makemodel.hernquist_halo()
-            rbins = np.logspace(np.log10(rmin), np.log10(rmax), numr+1)
-            
+        elif basis_model == "NFW":
+            print('-> Computing analytical NFW model')
             R, D, M, P = makemodel.makemodel(makemodel.powerhalo, M=np.sum(mass),
                                              funcargs=[1, 0, 1.0, 2.0], rvals = rbins,
+                                             pfile=modelname)
+        elif basis_model == "singlepowerlaw":
+            print('-> Computing analytical Hernquist model') 
+            R, D, M, P = makemodel.makemodel(makemodel.powerhalo, M=np.sum(mass),
+                                             funcargs=[1, 0, 2.5, 0.0], rvals = rbins,
                                              pfile=modelname)
             
         print('-> Model computed: rmin={}, rmax={}, numr={}'.format(R[0], R[-1], len(R)))
@@ -147,7 +118,7 @@ def makebasis(pos, mass, basis_model, config=None, basis_id='sphereSL', time=0,
         #rad, rho = empirical_density_profile(pos, mass, nbins=500)
         #makemodel_empirical(r_exact, rho, outfile=modelname)
         #R = [0.01, 600]
-        config = make_config(basis_id, numr, R[0], R[-1], lmax, nmax, scale, 
+        config = make_config(basis_id, nbins+1, R[0], R[-1], lmax, nmax, scale, 
                              modelname, cachename)
 
     # Construct the basis instances
