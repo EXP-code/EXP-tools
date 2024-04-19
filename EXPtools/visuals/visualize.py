@@ -253,6 +253,21 @@ def return_fields_in_grid(basis, coefficients, times=[0],
 
 
 def spherical_slice(basis, coefficients, gridspecs, rgrid):
+    """
+    Compute fields in a a spherical grid
+
+    Parameters:
+    basis (obj): object containing the basis functions for the simulation
+    coefficients (obj): object containing the coefficients for the simulation
+    gridspces (dict): Dictionary specifying the number of bins in theta_bins and phi_bins as integers
+    rgrid (float): radius where to build the spherical grid
+
+    return:
+    fields evaluated in the spherical grid. Dens, Dens0, phi, pho0
+    spherical grid, theta, phi
+    
+    """
+
     grid, theta_grid, phi_grid = make_grid(gridtype='spherical', gridspecs=gridspecs, 
                                     rgrid=rgrid, representation='cartesian')
     
