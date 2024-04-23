@@ -50,7 +50,8 @@ def makebasis(pos, mass, basis_model, config=None, basis_id='sphereSL', time=0,
                          and each column represents the coordinate of that particle.
     mass (numpy.ndarray): The masses of particles. The length of this array should be the same 
                           as the number of particles.
-    basismodel (string): The model to compute, in case modelname file is not found.
+    basismodel (string): The model to compute, NFW,Hernquist, singlepowerlaw and empirical are available
+                        A modelname file can be used to specify a particular model if needed.
     config (pyEXP.config.Config, optional): A configuration object that specifies the basis set. 
                                              If not provided, an empirical density profile will be computed 
                                              and a configuration object will be created automatically.
