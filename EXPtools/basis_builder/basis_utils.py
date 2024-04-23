@@ -128,9 +128,9 @@ def makebasis(pos, mass, basis_model, config=None, basis_id='sphereSL', time=0,
     
     #compute coefficients
     if norm_mass_coef == True :
-        coef = basis.createFromArray(mass/np.sum(mass), pos, time=time)
+        coef = basis.createFromArray(mass/np.sum(mass), [pos[:,0],pos[:,1],pos[:,2]], time=time)
     elif norm_mass_coef == False : 
-        coef = basis.createFromArray(mass, pos, time=time)
+        coef = basis.createFromArray(mass, [pos[:,0],pos[:,1],pos[:,2]], time=time)
 
     coefs = pyEXP.coefs.Coefs.makecoefs(coef, 'dark halo')
     coefs.add(coef)
