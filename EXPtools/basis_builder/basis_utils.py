@@ -51,13 +51,13 @@ def makebasis(pos, mass, basis_model, config=None, basis_id='sphereSL', time=0,
                          and each column represents the coordinate of that particle.
     mass (numpy.ndarray): The masses of particles. The length of this array should be the same 
                           as the number of particles.
-    basismodel ():
+    basismodel (string): The model to compute, in case modelname file is not found.
     config (pyEXP.config.Config, optional): A configuration object that specifies the basis set. 
                                              If not provided, an empirical density profile will be computed 
                                              and a configuration object will be created automatically.
     basis_id (str, optional): The type of basis set to be used. Default is 'sphereSL'.
     time (float, optional): The time at which the expansion is being computed. Default is 0.
-    nbins (int, optional): The number of radial grid points in the basis set. Default is 200.
+    nbins (int, optional): The number of radial grid points in the basis set. Default is 500.
     rmin (float, optional): The minimum radius of the basis set. Default is 0.61.
     rmax (float, optional): The maximum radius of the basis set. Default is 599.
     lmax (int, optional): The maximum harmonic order in the basis set. Default is 4.
@@ -67,7 +67,7 @@ def makebasis(pos, mass, basis_model, config=None, basis_id='sphereSL', time=0,
                                Default is 'dens_table.txt'.
     cachename (str, optional): The name of the file that will be used to cache the basis set. 
                                Default is '.slgrid_sph_cache'.
-    save_dir (str, optional): The name of the file if provided that will be used to save the coef files as .h5.
+    coef_file (str, optional): The name of the file if provided that will be used to save the coef files as .h5.
                               Default is ''. 
     Returns:
     tuple: A tuple containing the basis and the coefficients of the expansion.
