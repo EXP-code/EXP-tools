@@ -26,7 +26,7 @@ def make_config(basis_id, numr, rmin, rmax, lmax, nmax, scale,
     None
     """
     
-    config = '\n---\nid: {:s}\n'.format(basis_id)
+    config = 'id: {:s}\n'.format(basis_id)
     config += 'parameters:\n'
     config += '  numr: {:d}\n'.format(numr)
     config += '  rmin: {:.7f}\n'.format(rmin)
@@ -36,7 +36,6 @@ def make_config(basis_id, numr, rmin, rmax, lmax, nmax, scale,
     config += '  scale: {:.3f}\n'.format(scale)
     config += '  modelname: {}\n'.format(modelname)
     config += '  cachename: {}\n'.format(cachename)
-    config += '...\n'
     return config
 
     
