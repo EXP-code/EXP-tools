@@ -159,8 +159,8 @@ def make_grid(gridtype, gridspecs, rgrid, representation='cartesian'):
     
     if gridtype == 'spherical':
         arcostheta = np.linspace(-1, 1, gridspecs['theta_bins'])
-        phi = np.linspace(-np.pi, np.pi, gridspecs['phi_bins'])
-        theta_mesh, phi_mesh = np.meshgrid(np.arccos(arcostheta)-np.pi/2., phi)
+        phi = np.linspace(0, 2*np.pi, gridspecs['phi_bins'])
+        theta_mesh, phi_mesh = np.meshgrid(np.arccos(arcostheta), phi)
 
         if representation == 'cartesian':
             x = rgrid  * np.sin(theta_mesh) * np.cos(phi_mesh)
