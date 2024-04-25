@@ -6,13 +6,13 @@ routines to translate coefficients between agama, gala, EXP, galpy
 import numpy as np
 import pyEXP
 
-
-
-def agama_to_gala(agama_coefs):
+def agama_to_gala(agama_coefs, nmax, lmax):
     """
-
+    Translate AGAMA scf coefficients to Gala 
     Adapted from: https://github.com/GalacticDynamics-Oxford/Agama/blob/master/py/example_basis_set.py
+
     """
+    
     Snlm = np.zeros((nmax+1, lmax+1, lmax+1))
     Tnlm = np.zeros((nmax+1, lmax+1, lmax+1))
     for n in range(nmax+1):
