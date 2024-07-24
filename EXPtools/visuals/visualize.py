@@ -1,8 +1,8 @@
-import os,  sys, pickle, pyEXP
+import os, sys, pickle, pyEXP
 import numpy as np
 import matplotlib.pyplot as plt
 
-def make_basis_plot(basis, savefile=None, nsnap='mean', y=0.92, dpi=200):
+def make_basis_plot(basis, rvals, basis_props,  **kwargs):
     """
     Plots the potential of the basis functions for different values of l and n.
 
@@ -24,34 +24,42 @@ def make_basis_plot(basis, savefile=None, nsnap='mean', y=0.92, dpi=200):
 
     """
     # Set up grid for plotting potential
-    lrmin, lrmax, rnum = 0.5, 2.7, 100
+    
+    lrmin = basis_props['rmin']
+    lrmax = basis_props['rmax']
+    rnum = basis_props['nbins']
+    lmax = basis_props['lmax'] 
+    nmax = basis_props['nmax'] 
+
     halo_grid = basis.getBasis(lrmin, lrmax, rnum)
-    r = np.linspace(lrmin, lrmax, rnum)
-    r = np.power(10.0, r)
 
-    # Create subplots and plot potential for each l and n
-    fig, ax = plt.subplots(4, 5, figsize=(6,6), dpi=dpi, 
-                            sharex='col', sharey='row')
+    # Create subplots and plot potential for each l and n 
+
+    ncols = (lmax-1)//5 + 1
+    fig, ax = plt.subplots(lmax, 1, figsize=(8, 8), 
+                           sharex='col', sharey='row')
     plt.subplots_adjust(wspace=0, hspace=0)
-    ax = ax.flatten()
 
-    for l in range(len(ax)):
-        ax[l].set_title(f"$\ell = {l}$", y=0.8, fontsize=6)    
-        for n in range(20):
-            ax[l].semilogx(r, halo_grid[l][n]['potential'], '-', label="n={}".format(n), lw=0.5)
+    ax = ax.flatten()
+    for l in range(lmax):
+        ax[l].set_title(f"$\ell = {l}$")    
+        for n in range(nmax):
+            ax[l].semilogx(rvals, halo_grid[l][n]['potential'], '-', label="n={}".format(n), lw=0.5)
 
     # Add labels and main title
-    fig.supylabel('Potential', weight='bold', x=-0.02)
-    fig.supxlabel('Radius', weight='bold', y=0.02)
-    fig.suptitle(f'nsnap = {nsnap}', 
-                 fontsize=12, 
-                 weight='bold', 
-                 y=y,
-                )
+    ax[0].set_ylabel('Potential')
+    ax[-1].set_xlabel('Radius')
+    ## TODO: Move legend outside the figure
+    ax[0].legend(ncols=5)
+
+    if 'title' in kwargs:
+        fig.suptitle(kargs['title'])
     
     # Save plot if a filename was provided
-    if savefile:
-        plt.savefig(f'{savefile}', bbox_inches='tight')
+    if 'savefile' in kwargs:
+        plt.savefig(kwargs['savefile'], bbox_inches='tight')
+
+    return 0
 
 def find_field(basis, coefficients, time=0, xyz=(0, 0, 0), property='dens', include_monopole=True):
     """
@@ -174,11 +182,7 @@ def make_grid(gridtype, gridspecs, rgrid, representation='cartesian'):
   
     else:
         print('gridtype {} not implemented'.format(gridtype))  
-   
-
-
-
-
+  
 
 def return_fields_in_grid(basis, coefficients, times=[0], 
                        projection='3D', proj_plane=0, 
