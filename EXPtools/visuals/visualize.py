@@ -3,6 +3,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 def make_basis_plot(basis, rvals, basis_props,  **kwargs):
+def make_basis_plot(basis, lmax=6, nmax=20,
+                    savefile=None, nsnap='mean', y=0.92, dpi=200,
+                    lrmin=0.5, lrmax=2.7, rnum=100):
     """
     Plots the potential of the basis functions for different values of l and n.
 
@@ -13,14 +16,13 @@ def make_basis_plot(basis, rvals, basis_props,  **kwargs):
         savefile (str, optional): name of the file to save the plot as
         nsnap (str, optional): description of the snapshot being plotted
     y: float (optional
-        vertical position of the main title 
+        vertical position of the main title
     dpi: int (optional)
         resolution of the plot in dots per inch
 
     Returns
     -------
-    None
-        None
+    tuple: A tuple containing fig and ax.
 
     """
     # Set up grid for plotting potential
@@ -36,30 +38,32 @@ def make_basis_plot(basis, rvals, basis_props,  **kwargs):
     # Create subplots and plot potential for each l and n 
 
     ncols = (lmax-1)//5 + 1
-    fig, ax = plt.subplots(lmax, 1, figsize=(8, 8), 
+
+    # Create subplots and plot potential for each l and n
+    fig, ax = plt.subplots(lmax, 1, figsize=(10, 3*lmax), dpi=dpi,
                            sharex='col', sharey='row')
     plt.subplots_adjust(wspace=0, hspace=0)
 
     ax = ax.flatten()
+    
     for l in range(lmax):
-        ax[l].set_title(f"$\ell = {l}$")    
+        ax[l].set_title(f"$\ell = {l}$", y=0.8, fontsize=16)  
         for n in range(nmax):
-            ax[l].semilogx(rvals, halo_grid[l][n]['potential'], '-', label="n={}".format(n), lw=0.5)
+            ax[l].semilogx(r, halo_grid[l][n]['potential'],
+                           '-', label="n={}".format(n), lw=0.5)
 
     # Add labels and main title
-    ax[0].set_ylabel('Potential')
-    ax[-1].set_xlabel('Radius')
-    ## TODO: Move legend outside the figure
-    ax[0].legend(ncols=5)
-
-    if 'title' in kwargs:
-        fig.suptitle(kargs['title'])
-    
+    fig.supylabel('Potential', weight='bold', x=-0.02)
+    fig.supxlabel('Radius', weight='bold', y=0.02)
+    fig.suptitle(f'nsnap = {nsnap}',
+                 fontsize=12,
+                 weight='bold',
+                 y=y,
+                 )
     # Save plot if a filename was provided
-    if 'savefile' in kwargs:
-        plt.savefig(kwargs['savefile'], bbox_inches='tight')
-
-    return 0
+    if savefile:
+        plt.savefig(f'{savefile}', bbox_inches='tight')
+    return (fig, ax)
 
 def find_field(basis, coefficients, time=0, xyz=(0, 0, 0), property='dens', include_monopole=True):
     """

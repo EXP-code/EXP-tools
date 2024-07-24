@@ -26,7 +26,7 @@ def make_config(basis_id, numr, rmin, rmax, lmax, nmax, scale,
     None
     """
     
-    config = '\n---\nid: {:s}\n'.format(basis_id)
+    config = 'id: {:s}\n'.format(basis_id)
     config += 'parameters:\n'
     config += '  numr: {:d}\n'.format(numr)
     config += '  rmin: {:.7f}\n'.format(rmin)
@@ -36,13 +36,15 @@ def make_config(basis_id, numr, rmin, rmax, lmax, nmax, scale,
     config += '  scale: {:.3f}\n'.format(scale)
     config += '  modelname: {}\n'.format(modelname)
     config += '  cachename: {}\n'.format(cachename)
-    config += '...\n'
     return config
 
     
-def makebasis(pos, mass, basis_model, config=None, basis_id='sphereSL', time=0, 
-               nbins=500, rmin=0.61, rmax=599, log_space=True, lmax=4, nmax=20, scale=1, 
-               norm_mass_coef = True, modelname='dens_table.txt', cachename='.slgrid_sph_cache', add_coef = False, coef_file=''):
+def makebasis(pos, mass, basis_model, config=None, basis_id='sphereSL', time=0,
+              r_s=1.0, r_c=0.0,
+              nbins=500, rmin=0.61, rmax=599, log_space=True, lmax=4, nmax=20, scale=1,
+              norm_mass_coef = True, modelname='dens_table.txt', cachename='.slgrid_sph_cache', add_coef = False,
+              coef_file=''
+              ):
     """
     Create a BFE expansion for a given set of particle positions and masses.
     
@@ -51,13 +53,16 @@ def makebasis(pos, mass, basis_model, config=None, basis_id='sphereSL', time=0,
                          and each column represents the coordinate of that particle.
     mass (numpy.ndarray): The masses of particles. The length of this array should be the same 
                           as the number of particles.
-    basismodel ():
+    basismodel (string): The model to compute, NFW,Hernquist, singlepowerlaw and empirical are available
+                        A modelname file can be used to specify a particular model if needed.
     config (pyEXP.config.Config, optional): A configuration object that specifies the basis set. 
                                              If not provided, an empirical density profile will be computed 
                                              and a configuration object will be created automatically.
     basis_id (str, optional): The type of basis set to be used. Default is 'sphereSL'.
     time (float, optional): The time at which the expansion is being computed. Default is 0.
-    nbins (int, optional): The number of radial grid points in the basis set. Default is 200.
+    r_s (float,optional): scale radius used in the computation of the model.
+    r_c (float,optional): core radius used in the computation of the model.
+    nbins (int, optional): The number of radial grid points in the basis set. Default is 500.
     rmin (float, optional): The minimum radius of the basis set. Default is 0.61.
     rmax (float, optional): The maximum radius of the basis set. Default is 599.
     lmax (int, optional): The maximum harmonic order in the basis set. Default is 4.
@@ -67,7 +72,7 @@ def makebasis(pos, mass, basis_model, config=None, basis_id='sphereSL', time=0,
                                Default is 'dens_table.txt'.
     cachename (str, optional): The name of the file that will be used to cache the basis set. 
                                Default is '.slgrid_sph_cache'.
-    save_dir (str, optional): The name of the file if provided that will be used to save the coef files as .h5.
+    coef_file (str, optional): The name of the file if provided that will be used to save the coef files as .h5.
                               Default is ''. 
     Returns:
     tuple: A tuple containing the basis and the coefficients of the expansion.
@@ -94,18 +99,18 @@ def makebasis(pos, mass, basis_model, config=None, basis_id='sphereSL', time=0,
         elif basis_model == "Hernquist":
             print('-> Computing analytical Hernquist model')
             R, D, M, P = makemodel.makemodel(makemodel.powerhalo, M=np.sum(mass),
-                                             funcargs=[1, 0, 1.0, 3.0], rvals = rbins,
+                                             funcargs=[r_s, r_c, 1.0, 3.0], rvals = rbins,
                                              pfile=modelname)
         
         elif basis_model == "NFW":
             print('-> Computing analytical NFW model')
             R, D, M, P = makemodel.makemodel(makemodel.powerhalo, M=np.sum(mass),
-                                             funcargs=[1, 0, 1.0, 2.0], rvals = rbins,
+                                             funcargs=[r_s, r_c, 1.0, 2.0], rvals = rbins,
                                              pfile=modelname)
         elif basis_model == "singlepowerlaw":
             print('-> Computing analytical Hernquist model') 
             R, D, M, P = makemodel.makemodel(makemodel.powerhalo, M=np.sum(mass),
-                                             funcargs=[1, 0, 2.5, 0.0], rvals = rbins,
+                                             funcargs=[r_s, r_c, 2.5, 0.0], rvals = rbins,
                                              pfile=modelname)
             
         print('-> Model computed: rmin={}, rmax={}, numr={}'.format(R[0], R[-1], len(R)))
@@ -129,9 +134,9 @@ def makebasis(pos, mass, basis_model, config=None, basis_id='sphereSL', time=0,
     
     #compute coefficients
     if norm_mass_coef == True :
-        coef = basis.createFromArray(mass/np.sum(mass), pos, time=time)
+        coef = basis.createFromArray(mass/np.sum(mass), pos.T, time=time)
     elif norm_mass_coef == False : 
-        coef = basis.createFromArray(mass, pos, time=time)
+        coef = basis.createFromArray(mass, pos.T, time=time)
 
     coefs = pyEXP.coefs.Coefs.makecoefs(coef, 'dark halo')
     coefs.add(coef)
