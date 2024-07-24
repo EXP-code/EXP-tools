@@ -2,10 +2,9 @@ import os, sys, pickle, pyEXP
 import numpy as np
 import matplotlib.pyplot as plt
 
-def make_basis_plot(basis, rvals, basis_props,  **kwargs):
 def make_basis_plot(basis, lmax=6, nmax=20,
                     savefile=None, nsnap='mean', y=0.92, dpi=200,
-                    lrmin=0.5, lrmax=2.7, rnum=100):
+                    lrmin=0.5, lrmax=2.7, rnum=100, **kwargs):
     """
     Plots the potential of the basis functions for different values of l and n.
 
