@@ -1,7 +1,8 @@
-import os,  sys, pickle, pyEXP
+import os, sys, pickle, pyEXP
 import numpy as np
 import matplotlib.pyplot as plt
 
+def make_basis_plot(basis, rvals, basis_props,  **kwargs):
 def make_basis_plot(basis, lmax=6, nmax=20,
                     savefile=None, nsnap='mean', y=0.92, dpi=200,
                     lrmin=0.5, lrmax=2.7, rnum=100):
@@ -24,16 +25,27 @@ def make_basis_plot(basis, lmax=6, nmax=20,
     tuple: A tuple containing fig and ax.
 
     """
+    # Set up grid for plotting potential
+    
+    lrmin = basis_props['rmin']
+    lrmax = basis_props['rmax']
+    rnum = basis_props['nbins']
+    lmax = basis_props['lmax'] 
+    nmax = basis_props['nmax'] 
+
     halo_grid = basis.getBasis(lrmin, lrmax, rnum)
-    r = np.linspace(lrmin, lrmax, rnum)
-    r = np.power(10.0, r)
+
+    # Create subplots and plot potential for each l and n 
+
+    ncols = (lmax-1)//5 + 1
 
     # Create subplots and plot potential for each l and n
     fig, ax = plt.subplots(lmax, 1, figsize=(10, 3*lmax), dpi=dpi,
                            sharex='col', sharey='row')
     plt.subplots_adjust(wspace=0, hspace=0)
-    ax = ax.flatten()
 
+    ax = ax.flatten()
+    
     for l in range(lmax):
         ax[l].set_title(f"$\ell = {l}$", y=0.8, fontsize=16)  
         for n in range(nmax):
@@ -174,11 +186,7 @@ def make_grid(gridtype, gridspecs, rgrid, representation='cartesian'):
   
     else:
         print('gridtype {} not implemented'.format(gridtype))  
-   
-
-
-
-
+  
 
 def return_fields_in_grid(basis, coefficients, times=[0], 
                        projection='3D', proj_plane=0, 
