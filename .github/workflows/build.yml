@@ -20,7 +20,6 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: EXP-code/EXP
-          token: ${{ secrets.EXP_PAT }}
           path: exp
           ref: main
 
@@ -29,13 +28,14 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y build-essential libeigen3-dev libfftw3-dev libhdf5-dev libopenmpi-dev
-      
+          sudo pip install numpy
+          
       - name: Setup submodule and build
         working-directory: exp
         run: |
           git submodule update --init --recursive
           mkdir -p build/install 
-          ls
+      
 
       - name: Compile pyEXP - Linux
         if: runner.os == 'Linux'
