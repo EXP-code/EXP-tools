@@ -6,6 +6,6 @@ setuptools.setup(
         author="B-BFE collaboration",
         author_email="ngaravito@flatironinstitute.org",
         description="Analysis tools for EXP and other BFE packages",
-        packages=["EXPtools", "EXPtools/basis_builder/", "EXPtools/visuals", "EXPtools/utils"],
-	install_requires=["healpy","numpy","scipy"]
+        packages=["EXPtools", "EXPtools/basis_builder/", "EXPtools/visuals", "EXPtools/utils", "EXPtools/scf"],
+	install_requires=["healpy", "numpy","scipy"]
         )
