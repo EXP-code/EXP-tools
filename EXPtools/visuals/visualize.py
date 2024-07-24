@@ -38,6 +38,8 @@ def make_basis_plot(basis, lmax=6, nmax=20,
 
     ncols = (lmax-1)//5 + 1
 
+    r = np.linspace(lrmin, lrmax, rnum)
+    r = np.power(10.0, r) 
     # Create subplots and plot potential for each l and n
     fig, ax = plt.subplots(lmax, 1, figsize=(10, 3*lmax), dpi=dpi,
                            sharex='col', sharey='row')
@@ -56,9 +58,8 @@ def make_basis_plot(basis, lmax=6, nmax=20,
     fig.supxlabel('Radius', weight='bold', y=0.02)
     fig.suptitle(f'nsnap = {nsnap}',
                  fontsize=12,
-                 weight='bold',
-                 y=y,
-                 )
+                 y=y)
+
     # Save plot if a filename was provided
     if savefile:
         plt.savefig(f'{savefile}', bbox_inches='tight')
