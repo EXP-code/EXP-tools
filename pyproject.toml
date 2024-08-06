@@ -1,0 +1,43 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "EXPtools"
+version = "0.2"
+authors = [
+  { name="Nico Garavito-Camargo", email="ngaravito@flatironinstitute.org" }, 
+  { name="Arpit Arora", email="arora125@sas.upenn.edu"},
+  { name="Marcos", email="marcoseduardo.castillo@userena.cl"},
+  { name="Silvio Varela", email="silvio.varela@userena.cl"}
+]
+
+description = "Library to analyze and visualize basis function expansions using pyEXP"
+readme = "README.md"
+requires-python = ">=3.8"
+keywords = ["astronomy", "dynamics"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Topic :: Scientific/Engineering :: Astronomy",
+]
+
+dependencies = [
+    "numpy>=1.20",
+    "scipy>=1.8",
+    "astropy>=5.0",
+    "pyyaml",
+    "gala>=1.6",
+	"h5py==3.9.0",
+    "matplotlib>=3.8",
+    "healpy"
+]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["EXPtools", "EXPtools/ios", "EXPtools/basis_builder", "EXPtools/visuals", "EXPtools/utils", "EXPtools/scf"]
+
+[project.urls]
+Homepage = "https://github.com/EXP_code/EXPtools/"
+Issues = "https://github.com/EXP_code/EXPtools/issues"
+
