@@ -79,7 +79,7 @@ class Fields:
         self.times = coefficients.Times()
 
     def point_field(self, xyz):
-        coef.set_coefs(coefficients.getCoefStruct(time))
+        coef.set_coefs(self.coefs.getCoefStruct(self.times))
         return 0
 
     def slice(self, grid):
@@ -132,13 +132,13 @@ def find_field(basis, coefficients, time=0, xyz=(0, 0, 0), property='dens',
     
     if property == 'dens':
         if include_monopole:
-            return dens0
-        return dens + dens0
+            return densl0
+        return dens + densl0
 
     elif property == 'pot':
         if include_monopole:
-            return pot0
-        return pot + pot0
+            return potl0
+        return pot + potl0
 
     elif property == 'force':
         return [fx, fy, fz]
