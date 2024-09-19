@@ -30,7 +30,6 @@ def agama_to_gala(agama_coefs, nmax, lmax):
     return Snlm, Tnlm
 
     
-    return coefs
 
 
 def exp(config):
