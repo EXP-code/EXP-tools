@@ -79,7 +79,7 @@ class Fields:
         self.times = coefficients.Times()
 
     def point_field(self, xyz):
-        coef.set_coefs(self.coefs.getCoefStruct(self.times))
+        self.coef.set_coefs(self.coefs.getCoefStruct(self.times))
         return 0
 
     def slice(self, grid):
