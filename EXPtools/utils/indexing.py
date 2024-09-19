@@ -32,7 +32,7 @@ def I(l, m):
     assert abs(m) <= l, "m must be less than or equal to l"
     return int(l * (l + 1) / 2) + abs(m)
 
-def I_nlm(n, l, m):
+def I_nlm(n, l, m, lmax):
     """
     Calculate the index of a spherical harmonic element given the angular numbers n, l, and m .
 
@@ -40,12 +40,12 @@ def I_nlm(n, l, m):
     ----------
         n : int 
             The radial number
-            
         l : int
             The angular number
-            
         m : int 
             The magnetic quantum number, ranging from 0 to l.
+        lmax : int 
+            The maximum value of l in the basis
 
     Returns:
     --------
@@ -58,9 +58,8 @@ def I_nlm(n, l, m):
     assert abs(m) <= l, "m must be less than or equal to l"
 
     # determine the index of the n=n, l=0, m=0 term
-    n_idx = 0
-    for j in range(n+1):
-        n_idx += int(j * (j + 1) / 2) # number of terms for a given n
+    n_idx = int(total_terms(lmax)*n)
+
     # add the number of indices to reach the desired l,m
     return I(l, m) + n_idx
 
