@@ -25,10 +25,10 @@ def field3Dcontour(field, contour_range, contour_name, size, **kwargs):
 
     volume =  k3d.volume(field.astype(np.float32), 
                         alpha_coef=1.0,
-                        color_range=contour_range, #*field_max, 
+                        color_range=contour_range,  
                         color_map=(np.array(k3d.colormaps.paraview_color_maps.Cool_to_Warm_Extended).reshape(-1,4) 
                    * np.array([1,1.0,1.0,1.0])).astype(np.float32),
-                        name=contour_name)
+                        name=contour_name, compression_level=7)
 
     # Where this values come from? 
     volume.opacity_function  = [0.        , 0.        , 0.21327923, 0.98025   , 0.32439035,
@@ -104,5 +104,5 @@ def field3Drender(volumes, contour_ranges, size, contour_names=['Inner', 'Outter
                         orbit_name=kwargs['orbits_names'][orb], width=10)
             render += o
 
-    
+    render.grid = (-size[0], -size[1], -size[2], size[0], size[1], size[2])
     return render
