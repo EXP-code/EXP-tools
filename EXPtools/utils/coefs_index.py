@@ -2,6 +2,7 @@
 This module provides functions to work with index-based calculations for spherical harmonics coef series.
 """
 import numpy as np, math
+import math
 
 def total_terms(l_max):
     """
@@ -26,7 +27,6 @@ def I(l, m):
     Returns:
         int: The index corresponding to the specified angular numbers.
     """
-    import math
     assert isinstance(l, int) and isinstance(m, int), "l and m must be integers"
     assert l >= 0, "l must be greater than 0"
     assert abs(m) <= l, "m must be less than or equal to l"

@@ -1,10 +1,16 @@
+"""
+
+Functionalities to compute fields in several dimensions and coordinates
+representations. Currently, Spherical, Cartesian, and Cylindrical are
+implemented. 
+
+"""
+
 import os, sys, pickle, pyEXP
 import numpy as np
 import matplotlib.pyplot as plt
 
-def make_basis_plot(basis, lmax=6, nmax=20,
-                    savefile=None, nsnap='mean', y=0.92, dpi=200,
-                    lrmin=0.5, lrmax=2.7, rnum=100, **kwargs):
+def make_basis_plot(basis, basis_props, savefile=None, nsnap='mean', y=0.92, dpi=200, **kwargs):
     """
     Plots the potential of the basis functions for different values of l and n.
 
@@ -65,7 +71,31 @@ def make_basis_plot(basis, lmax=6, nmax=20,
         plt.savefig(f'{savefile}', bbox_inches='tight')
     return (fig, ax)
 
-def find_field(basis, coefficients, time=0, xyz=(0, 0, 0), property='dens', include_monopole=True):
+
+class Fields:
+    def __init__(self, basis, coefficients):
+        self.basis = basis
+        self.coefs = coefficients 
+        self.times = coefficients.Times()
+
+    def point_field(xyz):
+        coef.set_coefs(coefficients.getCoefStruct(time))
+    
+
+    def slice(grid):
+        """
+        representation: 
+            Cartesian, Spherical, Cylindrical
+
+        """
+        
+
+    def volume(grid):
+        """
+        """
+
+def find_field(basis, coefficients, time=0, xyz=(0, 0, 0), property='dens',
+        representation='Spherical', include_monopole=True):
     """
     Finds the value of the specified property of the field at the given position.
 
@@ -81,6 +111,7 @@ def find_field(basis, coefficients, time=0, xyz=(0, 0, 0), property='dens', incl
             The (x, y, z) position at which to evaluate the field. Default is (0, 0, 0).
         property: str (optional) 
             The property of the field to evaluate. Can be 'dens', 'pot', or 'force'. Default is 'dens'.
+        representation: 
         include_monopole: bool (optional) 
             Whether to return the monopole contribution to the property only. Default is True.
 
@@ -93,9 +124,10 @@ def find_field(basis, coefficients, time=0, xyz=(0, 0, 0), property='dens', incl
     ------
         ValueError: If the property argument is not 'dens', 'pot', or 'force'.
     """
-
+  
+    basis.setFieldType(representation)
     coefficients.set_coefs(coefficients.getCoefStruct(time))
-    dens0, pot0, dens, pot, fx, fy, fz = basis.getFields(xyz[0], xyz[1], xyz[2])
+    densl0, densl, dens, potl0, potl, pot, fx, fy, fz = basis.getFields(xyz[0], xyz[1], xyz[2])
     
     if property == 'dens':
         if include_monopole:
@@ -186,7 +218,7 @@ def make_grid(gridtype, gridspecs, rgrid, representation='cartesian'):
   
     else:
         print('gridtype {} not implemented'.format(gridtype))  
-  
+        return 0 
 
 def return_fields_in_grid(basis, coefficients, times=[0], 
                        projection='3D', proj_plane=0, 

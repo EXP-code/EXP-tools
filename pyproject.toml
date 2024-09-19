@@ -30,8 +30,18 @@ dependencies = [
     "gala>=1.6",
 	"h5py==3.9.0",
     "matplotlib>=3.8",
-    "healpy"
+    "healpy",
+    "k3d>=2.16.1"
 ]
+
+
+[project.optional-dependencies]
+# development dependency groups
+test = [
+    'pylint>=3.2.6',
+    'pytest>=8.3.2'
+]
+
 
 [tool.setuptools.packages.find]
 where = ["."]
