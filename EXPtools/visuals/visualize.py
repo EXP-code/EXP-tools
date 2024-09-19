@@ -78,21 +78,22 @@ class Fields:
         self.coefs = coefficients 
         self.times = coefficients.Times()
 
-    def point_field(xyz):
+    def point_field(self, xyz):
         coef.set_coefs(coefficients.getCoefStruct(time))
-    
+        return 0
 
-    def slice(grid):
+    def slice(self, grid):
         """
         representation: 
             Cartesian, Spherical, Cylindrical
 
         """
-        
+        return 0
 
-    def volume(grid):
+    def volume(self, grid):
         """
         """
+        return 0
 
 def find_field(basis, coefficients, time=0, xyz=(0, 0, 0), property='dens',
         representation='Spherical', include_monopole=True):
