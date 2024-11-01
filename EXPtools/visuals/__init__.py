@@ -1,4 +1,4 @@
-from .projections import mollweide
+from .projections import Projections 
 from .visualize import make_basis_plot
 from .visualize import find_field
 from .visualize import spherical_avg_prop
