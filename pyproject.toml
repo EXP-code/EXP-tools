@@ -28,7 +28,7 @@ dependencies = [
     "astropy>=5.0",
     "pyyaml",
     "gala>=1.6",
-	"h5py==3.9.0",
+    "h5py>=3.9.0",
     "matplotlib>=3.8",
     "healpy",
     "k3d>=2.16.1"
