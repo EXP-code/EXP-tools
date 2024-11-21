@@ -3,7 +3,7 @@ import numpy as np
 from scipy.linalg import norm
 from EXPtools.basis_builder import makemodel
 
-def make_config(basis_id, numr, rmin, rmax, lmax, nmax, scale, 
+def old_make_config(basis_id, numr, rmin, rmax, lmax, nmax, scale, 
                 modelname='', cachename='.slgrid_sph_cache'):
     """
     Creates a configuration file required to build a basis model.
@@ -34,6 +34,42 @@ def make_config(basis_id, numr, rmin, rmax, lmax, nmax, scale,
     config += '  Lmax: {:d}\n'.format(lmax)
     config += '  nmax: {:d}\n'.format(nmax)
     config += '  scale: {:.3f}\n'.format(scale)
+    config += '  modelname: {}\n'.format(modelname)
+    config += '  cachename: {}\n'.format(cachename)
+    return config
+
+
+def make_halo_config(basis_id, numr, rmin, rmax, lmax, nmax, rmapping, 
+                modelname, cachename):
+    """
+    Creates a configuration file required to build a basis model.
+
+    Args:
+    basis_id (str): The identity of the basis model.
+    numr (int): The number of radial grid points.
+    rmin (float): The minimum radius value.
+    rmax (float): The maximum radius value.
+    lmax (int): The maximum l value of the basis.
+    nmax (int): The maximum n value of the basis.
+    scale (float): Scaling factor for the basis.
+    modelname (str, optional): Name of the model. Default is an empty string.
+    cachename (str, optional): Name of the cache file. Default is '.slgrid_sph_cache'.
+
+    Returns:
+    str: A string representation of the configuration file.
+
+    Raises:
+    None
+    """
+    
+    config = 'id: {:s}\n'.format(basis_id)
+    config += 'parameters:\n'
+    config += '  numr: {:d}\n'.format(numr)
+    config += '  rmin: {:.7f}\n'.format(rmin)
+    config += '  rmax: {:.3f}\n'.format(rmax)
+    config += '  Lmax: {:d}\n'.format(lmax)
+    config += '  nmax: {:d}\n'.format(nmax)
+    config += '  rmapping: {:.3f}\n'.format(rmapping)
     config += '  modelname: {}\n'.format(modelname)
     config += '  cachename: {}\n'.format(cachename)
     return config
