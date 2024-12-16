@@ -1,5 +1,6 @@
 import numpy as np
 import scipy 
+from scipy.interpolate import interp1d, BSpline, splrep
 
 def empirical_density_profile(rbins, pos, mass):
     """
@@ -30,13 +31,16 @@ def empirical_density_profile(rbins, pos, mass):
     V_shells = 4/3 * np.pi * (rbins[1:]**3 - rbins[:-1]**3)
 
     # Compute density profile
-    density, _ = np.histogram(r_p, bins=rbins+1, weights=mass)
+    density, _ = np.histogram(r_p, bins=rbins, weights=mass)
     density /= V_shells
 
-    # Compute bin centers and return profile
-    #radius = 0.5 * (rbins[1:] + rbins[:-1])
+    #compute bin centers and return profile
+    radius = 0.5 * (rbins[1:] + rbins[:-1])
 
-    return density
+    tck_s = splrep(radius, np.log10(density), s=0.15)
+    dens2 = BSpline(*tck_s)(radius)
+
+    return radius, 10**dens2
 
 
 
