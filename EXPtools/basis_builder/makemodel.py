@@ -146,7 +146,10 @@ def makemodel(func, M, funcargs, rvals = 10.**np.linspace(-2.,4.,2000), pfile=''
     R = np.nanmax(rvals)
     
     # query out the density values
-    dvals = func(rvals,*funcargs)
+    if func == empirical_density_profile:
+        rvals, dvals = func(rvals,*funcargs)
+    else:
+        dvals = func(rvals,*funcargs)
 
     # make the mass and potential arrays
     mvals = np.zeros(dvals.size)
