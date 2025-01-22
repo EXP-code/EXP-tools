@@ -18,7 +18,7 @@ def remove_terms(original_coefficients, n, l, m):
         for i in range(len(l)):
             lm_idx = int(l[i]*(l[i]+1) / 2) + m[i]
             print(n[i],l[i],m[i], lm_idx)
-            try: coefs_matrix[n[i], lm_idx, t] = np.complex128(0)
+            try: coefs_matrix[lm_idx, n[i], t] = np.complex128(0)
             except IndexError: continue
         copy_coeffcients.setMatrix(mat=coefs_matrix[:,:, t], time=t_snaps[t])
     
