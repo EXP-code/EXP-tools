@@ -48,6 +48,29 @@ def inverse_I(I):
     m = I - int(l * (l + 1) / 2)  # Calculate m using the given formula
     return l, m
 
+def inverse_Inlm(I, lmax):
+    """
+    Calculate the angular numbers n, l, and m, given the index of a spherical harmonic element.
+    
+    Parameters
+    ----------
+        I : int 
+            The index of the spherical harmonic element
+        lmax : int 
+            The maximum value of l in the basis
+
+    Returns:
+    --------
+        tuple 
+            A 3-tuple containing the angular numbers (n, l, m)
+    """
+    assert isinstance(I, int) and I >=0, "I must be an interger greater than or equal to 0"
+    terms_per_n = int(total_terms(l_max=lmax))
+    n = I//terms_per_n
+    Irem = I%terms_per_n
+    l,m = inverse_I(Irem)
+    return n, l, m
+
 def set_specific_lm_non_zero(data, lm_pairs_to_set):
     """
     Sets specific (l, m) pairs in the input data to non-zero values.
@@ -78,3 +101,33 @@ def set_specific_lm_non_zero(data, lm_pairs_to_set):
         arr_filt[I(l, m), :, :] = data[I(l, m), :, :] 
 
     return arr_filt
+
+def listStates(n, lmax, allStates=True):
+    """
+    List all (n, l, m) combinations either up to or for
+    a given value of n and lmax
+
+    Parameters
+    ----------
+    n : int
+        Radial number
+    lmax : int
+        The maximum value of l in the basis
+    allStates : bool, optional
+        If True, list (n,l,m) combinations for the
+        the specified value of n only, by default True
+
+    Returns
+    -------
+    list
+        List of 3-tuples of the combinations, represented
+        as (n,l,m)
+    """
+    if allStates==False:
+        nmin, nmax = n, n+1
+    else:
+        nmin, nmax = 0, n+1
+    states = [(n,l,m) for n in range(nmin, nmax) 
+                       for l in range(0, lmax +  1) 
+                         for m in range(0, lmax + 1) if m<=l]
+    return states
