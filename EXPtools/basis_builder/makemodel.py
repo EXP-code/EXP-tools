@@ -28,7 +28,7 @@ def _write_table(tablename, radius, density, mass, potential):
         for r, d, m, p in zip(radius, density, mass, potential):
             print(f'{r} {d} {m} {p}', file=f)
 
-def makemodel(radius, density, Mtotal, output_filename='', physial_units=False, verbose=True):
+def makemodel(radius, density, Mtotal, output_filename='', physical_units=False, verbose=True):
     """
     Generate an EXP-compatible spherical basis function table.
 
