@@ -159,7 +159,7 @@ def makebasis(pos, mass, basis_model, config=None, basis_id='sphereSL', time=0,
         #rad, rho = empirical_density_profile(pos, mass, nbins=500)
         #makemodel_empirical(r_exact, rho, outfile=modelname)
         #R = [0.01, 600]
-        config = make_config(basis_id, nbins+1, R[0], R[-1], lmax, nmax, scale, 
+        config = make_halo_config(basis_id, nbins+1, R[0], R[-1], lmax, nmax, scale, 
                              modelname, cachename)
 
     # Construct the basis instances
