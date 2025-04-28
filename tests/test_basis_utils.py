@@ -1,7 +1,7 @@
 import numpy as np
 import tempfile
 import os
-from EXPtools import basis_builder
+from EXPtools.basis_builder import *
 
 def test_write_table():
     # Prepare dummy data
