@@ -1,90 +1,118 @@
 import numpy as np
-import scipy 
-from scipy.interpolate import interp1d, BSpline, splrep
 
-def makemodel(func, M, funcargs, rvals = 10.**np.linspace(-2.,4.,2000), pfile='', plabel = '',verbose=True):
-    """make an EXP-compatible spherical basis function table
-    
-    inputs
-    -------------
-    func        : (function) the callable functional form of the density
-    M           : (float) the total mass of the model, sets normalisations
-    funcargs    : (list) a list of arguments for the density function.
-    rvals       : (array of floats) radius values to evaluate the density function
-    pfile       : (string) the name of the output file. If '', will not print file
-    plabel      : (string) comment string
-    verbose     : (boolean)
-
-    outputs
-    -------------
-    R           : (array of floats) the radius values
-    D           : (array of floats) the density
-    M           : (array of floats) the mass enclosed
-    P           : (array of floats) the potential
-    
+def _write_table(tablename, radius, density, mass, potential):
     """
-    
-    R = np.nanmax(rvals)
-    
-    # query out the density values
-    if func == empirical_density_profile:
-        rvals, dvals = func(rvals,*funcargs)
-    else:
-        dvals = func(rvals,*funcargs)
+    Write a table of radius, density, mass, and potential values to a text file.
 
-    # make the mass and potential arrays
-    mvals = np.zeros(dvals.size)
-    pvals = np.zeros(dvals.size)
-    pwvals = np.zeros(dvals.size)
+    Parameters
+    ----------
+    tablename : str
+        Name of the output file where the table will be written.
+    radius : array-like
+        Radius values.
+    density : array-like
+        Density values corresponding to radius.
+    mass : array-like
+        Mass values corresponding to radius.
+    potential : array-like
+        Potential values corresponding to radius.
 
-    # initialise the mass enclosed an potential energy
-    mvals[0] = 1.e-15
+    Returns
+    -------
+    None
+    """
+    with open(tablename, 'w') as f:
+        print('! ', tablename, file=f)
+        print('! R    D    M    P', file=f)
+        print(radius.size, file=f)
+        for r, d, m, p in zip(radius, density, mass, potential):
+            print(f'{r} {d} {m} {p}', file=f)
+
+def makemodel(radius, density, Mtotal, output_filename='', physial_units=False, verbose=True):
+    """
+    Generate an EXP-compatible spherical basis function table.
+
+    Parameters
+    ----------
+    radius : array-like
+        Radii at which the density values are evaluated.
+    density : array-like
+        Density values corresponding to radius.
+    Mtotal : float
+        Total mass of the model, used for normalization.
+    output_filename : str, optional
+        Name of the output file to save the table. If empty, no file is written.
+    verbose : bool, optional
+        If True, prints scaling information.
+
+    Returns
+    -------
+    radius_scaled : ndarray
+        Scaled radius values.
+    density_scaled : ndarray
+        Scaled density values.
+    mass_scaled : ndarray
+        Scaled enclosed mass values.
+    potential_scaled : ndarray
+        Scaled potential values.
+    """
+    Rmax = np.nanmax(radius)
+
+    mass = np.zeros_like(density)
+    pwvals = np.zeros_like(density)
+
+    mass[0] = 1.e-15
     pwvals[0] = 0.
 
-    # evaluate mass enclosed and potential energy by recursion
-    for indx in range(1,dvals.size):
-        mvals[indx] = mvals[indx-1] +\
-          2.0*np.pi*(rvals[indx-1]*rvals[indx-1]*dvals[indx-1] +\
-                 rvals[indx]*rvals[indx]*dvals[indx])*(rvals[indx] - rvals[indx-1]);
-        pwvals[indx] = pwvals[indx-1] + \
-          2.0*np.pi*(rvals[indx-1]*dvals[indx-1] + rvals[indx]*dvals[indx])*(rvals[indx] - rvals[indx-1]);
+    #dr = radius[indx] - radius[indx - 1]
+    dr = np.diff(radius)  # differences between consecutive radii
+
+    # Midpoint mass contribution terms
+    mass_contrib = 2.0 * np.pi * (
+        radius[:-1]**2 * density[:-1] + radius[1:]**2 * density[1:]
+    ) * dr
+
+    pwvals_contrib = 2.0 * np.pi * (
+        radius[:-1] * density[:-1] + radius[1:] * density[1:]
+    ) * dr
+
+    # Now cumulative sum to get the arrays
+    mass = np.concatenate(([1e-15], 1e-15 + np.cumsum(mass_contrib)))
+    pwvals = np.concatenate(([0.0], np.cumsum(pwvals_contrib)))
     
-    # evaluate potential (see theory document)
-    pvals = -mvals/(rvals+1.e-10) - (pwvals[dvals.size-1] - pwvals)
+    potential = -mass / (radius + 1.e-10) - (pwvals[-1] - pwvals)
 
-    # get the maximum mass and maximum radius
-    M0 = mvals[dvals.size-1]
-    R0 = rvals[dvals.size-1]
+    M0 = mass[-1]
+    R0 = radius[-1]
 
-    # compute scaling factors
-    Beta = (M/M0) * (R0/R);
-    Gamma = np.sqrt((M0*R0)/(M*R)) * (R0/R);
-    if verbose:
-        print("! Scaling:  R=",R,"  M=",M)
-
-    rfac = np.power(Beta,-0.25) * np.power(Gamma,-0.5);
-    dfac = np.power(Beta,1.5) * Gamma;
-    mfac = np.power(Beta,0.75) * np.power(Gamma,-0.5);
-    pfac = Beta;
+    Beta = (Mtotal / M0) * (R0 / Rmax)
+    Gamma = np.sqrt((M0 * R0) / (Mtotal * Rmax)) * (R0 / Rmax)
 
     if verbose:
-        print(rfac,dfac,mfac,pfac)
+        print(f"! Scaling: R = {Rmax}  M = {Mtotal}")
 
-    # save file if desired
-    if pfile != '':
-        f = open(pfile,'w')
-        print('! ',plabel,file=f)
-        print('! R    D    M    P',file=f)
+    rfac = Beta**-0.25 * Gamma**-0.5
+    dfac = Beta**1.5 * Gamma
+    mfac = Beta**0.75 * Gamma**-0.5
+    pfac = Beta
 
-        print(rvals.size,file=f)
+    if physical_units == True:
+        rfac=1
+        dfac=1
+        mfac=1
+        pfac=1
 
-        for indx in range(0,rvals.size):
-            print('{0} {1} {2} {3}'.format( rfac*rvals[indx],\
-              dfac*dvals[indx],\
-              mfac*mvals[indx],\
-              pfac*pvals[indx]),file=f)
-    
-        f.close()
-    
-    return rvals*rfac,dfac*dvals,mfac*mvals,pfac*pvals
+    if verbose:
+        print(f"Scaling factors: rfac = {rfac}, dfac = {dfac}, mfac = {mfac}, pfac = {pfac}")
+
+    if output_filename:
+        _write_table(
+            output_filename,
+            radius * rfac,
+            density * dfac,
+            mass * mfac,
+            potential * pfac
+        )
+
+    return radius * rfac, density * dfac, mass * mfac, potential * pfac
 
