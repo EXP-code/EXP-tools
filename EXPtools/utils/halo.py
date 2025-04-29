@@ -62,9 +62,9 @@ class ICHernquist:
         r = self.sample_profile()
         
         xyz = np.zeros((self.size, 3))
-        xyz[:,0] = r * np.cos(phi) * np.sin(theta) / a + center[0]
-        xyz[:,1] = r * np.sin(phi) * np.sin(theta) / b + center[1]
-        xyz[:,2] = r * np.cos(theta) / c   + center[2]
+        xyz[:,0] = r * np.cos(phi) * np.sin(theta) * a + center[0]
+        xyz[:,1] = r * np.sin(phi) * np.sin(theta) * b + center[1]
+        xyz[:,2] = r * np.cos(theta) * c   + center[2]
         
         rot = Rot.from_euler(rot_axis, rot_angle, degrees=True)
         rot_xyz = rot.apply(xyz)
