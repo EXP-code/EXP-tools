@@ -1,32 +1,37 @@
 import numpy as np
 
-def _write_table(tablename, radius, density, mass, potential):
+def write_table(tablename, radius, density, mass, potential, fmt="%.6e"):
     """
     Write a table of radius, density, mass, and potential values to a text file.
 
     Parameters
     ----------
     tablename : str
-        Name of the output file where the table will be written.
-    radius : array-like
-        Radius values.
-    density : array-like
-        Density values corresponding to radius.
-    mass : array-like
-        Mass values corresponding to radius.
-    potential : array-like
-        Potential values corresponding to radius.
+        Output filename.
+    radius, density, mass, potential : array-like
+        Arrays of physical quantities, all with the same length.
+    fmt : str, optional
+        Format string for numerical values. Defaults to scientific notation with 6 decimals.
 
-    Returns
-    -------
-    None
+    Notes
+    -----
+    Writes the table in the following format:
+        ! <tablename>
+        ! R    D    M    P
+        <Nrows>
+        <radius> <density> <mass> <potential>
     """
-    with open(tablename, 'w') as f:
-        print('! ', tablename, file=f)
-        print('! R    D    M    P', file=f)
-        print(radius.size, file=f)
-        for r, d, m, p in zip(radius, density, mass, potential):
-            print(f'{r} {d} {m} {p}', file=f)
+    # Convert inputs to NumPy arrays (for safety and performance)
+    radius = np.asarray(radius)
+    density = np.asarray(density)
+    mass = np.asarray(mass)
+    potential = np.asarray(potential)
+
+    # Stack data into a single 2D array for fast writing
+    data = np.column_stack((radius, density, mass, potential))
+
+    header = f"! {tablename}\n! R    D    M    P\n{len(radius)}"
+    np.savetxt(tablename, data, fmt=fmt, header=header, comments="")
 
 def makemodel(radius, density, Mtotal, output_filename='', physical_units=False, verbose=True):
     """
@@ -106,7 +111,7 @@ def makemodel(radius, density, Mtotal, output_filename='', physical_units=False,
         print(f"Scaling factors: rfac = {rfac}, dfac = {dfac}, mfac = {mfac}, pfac = {pfac}")
 
     if output_filename:
-        _write_table(
+        write_table(
             output_filename,
             radius * rfac,
             density * dfac,

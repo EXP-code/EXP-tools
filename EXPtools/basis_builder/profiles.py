@@ -1,127 +1,109 @@
+"""
+Common halo profiles
+"""
 import numpy as np
 from scipy import special
 
 class Profiles:
-    def __init__(self, radius, scale_radius, alpha=1., beta=2.0):
+    """
+    Density profiles of dark matter halos.
+
+    Parameters
+    ----------
+    radius : array-like
+        Radial distances at which to evaluate profiles. Units: length.
+    scale_radius : float
+        Characteristic scale radius of the halo. Units: length.
+    alpha : float, optional
+        Inner slope of the halo. Default is 1.0 (NFW).
+    beta : float, optional
+        Outer slope of the halo. Default is 2.0 (NFW-like).
+
+    Notes
+    -----
+    Common parameter choices:
+        - NFW: alpha=1, beta=2
+        - Hernquist: alpha=1, beta=3
+        - Single power law: alpha=2.5, beta=0
+    """
+
+    def __init__(self, radius, scale_radius, amplitud=1.0, alpha=1.0, beta=2.0):
+        self.radius = np.asarray(radius, dtype=float)
+        self.scale_radius = float(scale_radius)
+        self.alpha = float(alpha)
+        self.beta = float(beta)
+        self.ra = self.radius / self.scale_radius
+        self.amp = float(amplitud)
+
+    def power_halo(self, rc=0.0):
         """
-        Class with density profiles of Dark Matter halos
+        Generic two-power-law distribution.
 
-        inputs
+        Parameters
         ----------
-        r      : (float) radius values
-        rs     : (float, default=1.) scale radius 
-        alpha  : (float, default=1.) inner halo slope
-        beta   : (float, default=1.e-7) outer halo slope
-        
-        notes
-        ----------
-        different combinations are known distributions.
-        alpha=1,beta=2 is NFW  (default)
-        alpha=1,beta=3 is Hernquist
-        alpha=2.5, beta=0 is a typical single power law halo
+        rc : float, optional
+            Core radius. Default is 0 (no core).
 
+        Returns
+        -------
+        ndarray
+            Density values at each radius.
         """
-        
-        self.radius = radius
-        self.scale_radius = scale_radius
-        self.alpha = alpha
-        self.beta = beta
-        self.ra = self.radius/self.scale_radius
+        rc_scaled = rc / self.scale_radius
+        return self.amp / ((self.ra + rc_scaled) ** self.alpha *
+                      (1 + self.ra) ** self.beta)
 
-
-    def powerhalo(self, rc=0.0):
+    def power_halo_rolloff(self, rc=0.0, rtrunc_factor=25.0, wtrunc_factor=0.2):
         """
-        Generic two power law distribution
-        
-        inputs
-        ----------
-        rc     : (float, default=0. i.e. no core) core radius
-        
-        returns
-        ----------
-        densities evaluated at r
+        Two-power-law distribution with an error-function rolloff.
 
-        notes
+        Parameters
         ----------
-        different combinations are known distributions.
-        alpha=1,beta=2 is NFW
-        alpha=1,beta=3 is Hernquist
-        alpha=2.5,beta=0 is a typical single power law halo
-        
-                
-        
-        """
-        return 1./(((self.ra+rc/self.scale_radius)**self.alpha)*((1+self.ra)**self.beta))
-        
-    
-    def powerhalorolloff(self, rc=0.0):
-        """
-        Generic twopower law distribution with an erf rolloff
-        
-        
-        inputs
-        ----------
-        rc     : (float, default=0. i.e. no core) core radius
-        
-        returns
-        ----------
-        densities evaluated at r
+        rc : float, optional
+            Core radius. Default is 0.
+        rtrunc_factor : float, optional
+            Truncation radius in units of scale radius. Default is 25.
+        wtrunc_factor : float, optional
+            Width of rolloff in units of rtrunc. Default is 0.2.
 
-        notes
-        ----------
-        different combinations are known distributions.
-        alpha=1,beta=2 is NFW
-        alpha=1,beta=3 is Hernquist
-        alpha=2.5,beta=0 is a typical single power law halo
-   
-        
+        Returns
+        -------
+        ndarray
+            Density values with truncation applied.
         """
-        dens = 1./(((self.ra+rc/self.scale_radius)**self.alpha)*((1+self.ra)**self.beta))
-        rtrunc = 25*self.scale_radius 
-        wtrunc = rtrunc*0.2
-        rolloff = 0.5 - 0.5*special.erf((self.radius-rtrunc)/wtrunc)
-        return dens*rolloff
-
+        dens = self.power_halo(rc=rc)
+        rtrunc = rtrunc_factor * self.scale_radius
+        wtrunc = wtrunc_factor * rtrunc
+        rolloff = 0.5 - 0.5 * special.erf((self.radius - rtrunc) / wtrunc)
+        return dens * rolloff
 
     def plummer_density(self):
         """
-        Plummer density profile
+        Plummer density profile.
 
-        inputs
-        ---------
+        Returns
+        -------
+        ndarray
+            Density values at each radius.
+        """
+        rs2 = self.scale_radius ** 2
+        return (3.0 * self.amp / (4 * np.pi)) * rs2 * (rs2 + self.radius ** 2) ** -2.5
 
-        
-        returns
+    def two_power_density_with_rolloff(self, rcen, wcen):
+        """
+        Two-power-law distribution with a central rolloff.
+
+        Parameters
         ----------
-        densities evaluated at r
-        """
-        return ((3.0)/(4*np.pi))*(self.scale_radius**2.)*((self.scale_radius**2 + self.radius**2)**(-2.5))
+        rcen : float
+            Center radius for rolloff in units of scale radius.
+        wcen : float
+            Width of rolloff in units of scale radius.
 
-    def twopower_density_withrolloff(self, rcen, wcen):
+        Returns
+        -------
+        ndarray
+            Density values with central rolloff applied.
         """
-        inputs
-        ---------
-
-        
-        returns
-        ----------
-        densities evaluated at r
-        """
-        
-        
-        prefac = 0.5*(1.-special.erf((self.ra-rcen)/wcen))
-        return prefac*(self.ra**-self.alpha)*(1+self.ra)**(-self.beta+self.alpha)
-
-    def hernquist_halo(self):
-        """
-        TODO: Do we need these profile
-        Hernquist halo
-        
-        inputs
-        ---------
-        
-        returns
-        ----------
-        densities evaluated at r
-        """
-        return 1 / ( 2*np.pi * (self.radius/self.scale_radius) * (1 + self.radius/self.scale_radius)**3)
+        prefac = 0.5 * (1.0 - special.erf((self.ra - rcen) / wcen))
+        return prefac * self.amp * self.ra ** -self.alpha * (1 + self.ra) ** (-self.beta + self.alpha)
