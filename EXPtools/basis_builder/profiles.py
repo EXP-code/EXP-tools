@@ -4,6 +4,7 @@ Common halo profiles
 import numpy as np
 from scipy import special
 
+
 class Profiles:
     """
     Density profiles of dark matter halos.
@@ -18,6 +19,8 @@ class Profiles:
         Inner slope of the halo. Default is 1.0 (NFW).
     beta : float, optional
         Outer slope of the halo. Default is 2.0 (NFW-like).
+    amplitude : float, optional
+        normalization. Default is 1
 
     Notes
     -----
@@ -87,7 +90,7 @@ class Profiles:
             Density values at each radius.
         """
         rs2 = self.scale_radius ** 2
-        return (3.0 * self.amp / (4 * np.pi)) * rs2 * (rs2 + self.radius ** 2) ** -2.5
+        return (3.0 * self.amp / (4 * np.pi)) * rs2 * (rs2 + self.radius**2)**(-2.5)
 
     def two_power_density_with_rolloff(self, rcen, wcen):
         """
