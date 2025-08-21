@@ -27,6 +27,7 @@ def test_write_table():
     # Clean up
     os.remove(filename)
 
+
 def test_makemodel():
     # Create simple synthetic density profile
     radius = np.logspace(-1, 1, 5)  # 5 points from 0.1 to 10
@@ -35,7 +36,7 @@ def test_makemodel():
     Mtotal = 10.0  # desired total mass
 
     # Run model generation
-    r_scaled, d_scaled, m_scaled, p_scaled = makemodel(radius, density, Mtotal, verbose=False)
+    r_scaled, d_scaled, m_scaled, p_scaled = make_model(radius, density, Mtotal, verbose=False)
 
     # Assertions
     assert r_scaled.shape == radius.shape
