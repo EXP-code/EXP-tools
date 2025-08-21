@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "EXPtools"
-version = "0.2"
+version = "0.2.1"
 authors = [
   { name="Nico Garavito-Camargo", email="ngaravito@flatironinstitute.org" }, 
   { name="Arpit Arora", email="arora125@sas.upenn.edu"},
@@ -42,10 +42,9 @@ test = [
     'pytest>=8.3.2'
 ]
 
-
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["EXPtools", "EXPtools/ios", "EXPtools/basis_builder", "EXPtools/visuals", "EXPtools/utils", "EXPtools/scf"]
+include = ["EXPtools", "EXPtools.*"]
 
 [project.urls]
 Homepage = "https://github.com/EXP_code/EXPtools/"
