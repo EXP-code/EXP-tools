@@ -269,8 +269,7 @@ def make_basis(R, D, Mtotal, basis_params, modelname="test_model.txt"):
     """
     R, D, M, P = make_model(
         D, R, Mtotal=Mtotal, 
-        output_filename=modelname, 
-        pfile=modelname
+        output_filename=modelname
     )
 
     config = make_config(

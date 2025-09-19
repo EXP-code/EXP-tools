@@ -33,7 +33,7 @@ def write_table(tablename, radius, density, mass, potential, fmt="%.6e"):
     header = f"! {tablename}\n! R    D    M    P\n{len(radius)}"
     np.savetxt(tablename, data, fmt=fmt, header=header, comments="")
 
-def makemodel(radius, density, Mtotal, output_filename='', physical_units=False, verbose=True):
+def make_model(radius, density, Mtotal, output_filename='', physical_units=False, verbose=True):
     """
     Generate an EXP-compatible spherical basis function table.
 
@@ -47,33 +47,39 @@ def makemodel(radius, density, Mtotal, output_filename='', physical_units=False,
         Total mass of the model, used for normalization.
     output_filename : str, optional
         Name of the output file to save the table. If empty, no file is written.
+    physical_units : bool, optional
+        If True, disables scaling and returns physical values (default: False).
     verbose : bool, optional
         If True, prints scaling information.
 
     Returns
     -------
-    radius_scaled : ndarray
-        Scaled radius values.
-    density_scaled : ndarray
-        Scaled density values.
-    mass_scaled : ndarray
-        Scaled enclosed mass values.
-    potential_scaled : ndarray
-        Scaled potential values.
+    result : dict
+        Dictionary with the following keys:
+        - 'radius' : ndarray
+            Scaled radius values.
+        - 'density' : ndarray
+            Scaled density values.
+        - 'mass' : ndarray
+            Scaled enclosed mass values.
+        - 'potential' : ndarray
+            Scaled potential values.
     """
+    EPS_MASS = 1e-15
+    EPS_R = 1e-10
+    
     Rmax = np.nanmax(radius)
-
+    
     mass = np.zeros_like(density)
     pwvals = np.zeros_like(density)
 
     mass[0] = 1.e-15
     pwvals[0] = 0.
 
-    #dr = radius[indx] - radius[indx - 1]
-    dr = np.diff(radius)  # differences between consecutive radii
+    dr = np.diff(radius)  
 
-    # Midpoint mass contribution terms
-    mass_contrib = 2.0 * np.pi * (
+    # Midpoint integration for enclosed mass and potential
+        mass_contrib = 2.0 * np.pi * (
         radius[:-1]**2 * density[:-1] + radius[1:]**2 * density[1:]
     ) * dr
 
@@ -82,10 +88,10 @@ def makemodel(radius, density, Mtotal, output_filename='', physical_units=False,
     ) * dr
 
     # Now cumulative sum to get the arrays
-    mass = np.concatenate(([1e-15], 1e-15 + np.cumsum(mass_contrib)))
+    mass = np.concatenate(([EPS_MASS], EPS_MASS + np.cumsum(mass_contrib)))
     pwvals = np.concatenate(([0.0], np.cumsum(pwvals_contrib)))
     
-    potential = -mass / (radius + 1.e-10) - (pwvals[-1] - pwvals)
+    potential = -mass / (radius + EPS_R) - (pwvals[-1] - pwvals)
 
     M0 = mass[-1]
     R0 = radius[-1]
@@ -101,11 +107,8 @@ def makemodel(radius, density, Mtotal, output_filename='', physical_units=False,
     mfac = Beta**0.75 * Gamma**-0.5
     pfac = Beta
 
-    if physical_units == True:
-        rfac=1
-        dfac=1
-        mfac=1
-        pfac=1
+    if physical_units:
+        rfac = dfac = mfac = pfac = 1.0
 
     if verbose:
         print(f"Scaling factors: rfac = {rfac}, dfac = {dfac}, mfac = {mfac}, pfac = {pfac}")
@@ -119,5 +122,10 @@ def makemodel(radius, density, Mtotal, output_filename='', physical_units=False,
             potential * pfac
         )
 
-    return radius * rfac, density * dfac, mass * mfac, potential * pfac
+    return return {
+        "radius": radius * rfac,
+        "density": density * dfac,
+        "mass": mass * mfac,
+        "potential": potential * pfac,
+    }
 
