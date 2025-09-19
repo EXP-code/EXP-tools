@@ -10,7 +10,7 @@ import os
 import numpy as np
 from pytest import approx
 import pyEXP
-from EXPtools.basis_builder import make_config
+from EXPtools.basis_builder.basis_utils import make_config
 
 DATAPATH = "../../tests/data/"
 
