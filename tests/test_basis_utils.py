@@ -1,7 +1,8 @@
 import numpy as np
 import tempfile
 import os
-from EXPtools.basis_builder import *
+import yaml
+from EXPtools.basis_builder import make_model, make_config, _write_table
 
 def test_write_table():
     # Prepare dummy data
@@ -26,6 +27,53 @@ def test_write_table():
 
     # Clean up
     os.remove(filename)
+
+
+def test_make_config():
+    """Test the make_config function for both 'sphereSL' and 'cylinder'."""
+
+    # ---- Test sphereSL ----
+    R = np.linspace(1e-3, 300, 400)
+    np.savetxt("dummy_model.txt", np.c_[R, R, R])  # 3 columns, like your models
+
+    yaml_str = make_config(
+        basis_id="sphereSL",
+        lmax=8, nmax=10, rmapping=R[-1],
+        modelname="dummy_model.txt",
+        cachename=".cache_test"
+    )
+    cfg = yaml.safe_load(yaml_str)
+
+    # Check top-level keys
+    assert cfg["id"] == "sphereSL"
+    params = cfg["parameters"]
+    assert params["numr"] == len(R)
+    assert isinstance(params["Lmax"], int)
+    assert isinstance(params["nmax"], int)
+    assert "rmin_str" in params and "rmax_str" in params
+
+    # ---- Test cylinder ----
+    yaml_str_cyl = make_config(
+        basis_id="cylinder",
+        acyl=1.5, hcyl=2.5,
+        nmaxfid=20, lmaxfid=10, mmax=5, nmax=8,
+        ncylodd=1, ncylnx=32, ncylny=32,
+        rnum=64, pnum=32, tnum=16, vflag=0,
+        logr=True,
+        cachename="cyl_cache"
+    )
+    cfg_cyl = yaml.safe_load(yaml_str_cyl)
+
+    assert cfg_cyl["id"] == "cylinder"
+    params_cyl = cfg_cyl["parameters"]
+    assert isinstance(params_cyl["acyl"], float)
+    assert isinstance(params_cyl["hcyl"], float)
+    assert isinstance(params_cyl["logr"], bool)
+    assert isinstance(params_cyl["ncylnx"], int)
+    assert isinstance(params_cyl["ncylny"], int)
+    assert isinstance(params_cyl["cachename"], str)
+
+    print("✅ All tests passed for make_config")
 
 
 def test_makemodel():

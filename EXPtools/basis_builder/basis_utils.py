@@ -38,58 +38,162 @@ def write_table(tablename, radius, density, mass, potential, fmt="%.6e"):
     header = f"! {tablename}\n! R    D    M    P\n{len(radius)}"
     np.savetxt(tablename, data, fmt=fmt, header=header, comments="")
 
-def make_config(basis_id, lmax, nmax, rmapping=1,
-    modelname="", cachename=".slgrid_sph_cache",
-    float_fmt_rmin="{:.7f}", float_fmt_rmax="{:.3f}", float_fmt_rmapping="{:.3f}"):
+
+def check_basis_params(basis_id, **kwargs):
+    """
+    Check that the required keyword arguments for a given basis are provided.
+
+    Parameters
+    ----------
+    basis_id : str
+        The identifier of the basis set. 
+        Accepted values are:
+        - ``'sphereSL'`` : Spherical basis with Stäckel-like mapping.
+        - ``'cylinder'`` : Cylindrical basis.
+    **kwargs : dict
+        Arbitrary keyword arguments corresponding to the basis parameters.
+        The required keys depend on ``basis_id``:
+
+        - For ``'sphereSL'``:
+          ['lmax', 'mmax', 'modelname', 'rmapping', 'cachename']
+
+        - For ``'cylinder'``:
+          ['acyl', 'hcyl', 'nmaxfid', 'lmaxfid', 'mmax', 'nmax', 'ncylodd',
+           'ncylnx', 'ncylny', 'rnum', 'pmun', 'tnum', 'vflag', 'logr', 'cachename']
+
+    Returns
+    -------
+    bool
+        Returns ``True`` if all mandatory parameters are present.
+
+    Raises
+    ------
+    KeyError
+        If one or more mandatory keyword arguments are missing for the selected basis.
+    AttributeError
+        If ``basis_id`` is not recognized (must be either 'sphereSL' or 'cylinder').
+
+    Examples
+    --------
+    check_basis_params('sphereSL', lmax=4, mmax=4, modelname='hernquist',
+    ...                    rmapping='linear', cachename='cache_sph')
+    True
+
+    check_basis_params('cylinder', acyl=1.0, hcyl=2.0)  
+    Traceback (most recent call last):
+    ...
+    KeyError: "Missing mandatory keyword arguments missing: [...]"
+    """
+    
+    if basis_id == 'sphereSL':
+        mandatory_keys = ['lmax', 'mmax', 'modelname', 'rmapping', 'cachename']
+        missing = [key for key in mandatory_keys if key not in kwargs]
+        if missing:
+            raise KeyError(f"Missing mandatory keyword arguments missing: {missing}")
+        return True
+    elif basis_id == 'cylinder':
+        mandatory_keys = ['acyl', 'hcyl', 'nmaxfid', 'lmaxfid', 
+                           'mmax', 'nmax', 'ncylodd', 'ncylnx', 
+                        
+                           'ncylny', 'rnum', 'pmun', 'tnum', 'vflag', 'logr', 'cachename']  
+        missing = [key for key in mandatory_keys if key not in kwargs]
+        if missing:
+            raise KeyError(f"Missing mandatory keyword arguments missing: {missing}")
+        return True
+    else: 
+        raise AttributeError(f"basis id {basis_id} not found. Please chose between sphereSL or cylinder")
+	
+
+def make_config(basis_id, float_fmt_rmin="{:.7f}", float_fmt_rmax="{:.3f}",
+                float_fmt_rmapping="{:.3f}", **kwargs):
     """
     Create a YAML configuration file string for building a basis model.
 
     Parameters
     ----------
     basis_id : str
-        Identity of the basis model.
-    numr : int
-        Number of radial grid points.
-    rmin : float
-        Minimum radius value.
-    rmax : float
-        Maximum radius value.
-    lmax : int
-        Maximum `l` value of the basis.
-    nmax : int
-        Maximum `n` value of the basis.
-    rmapping : float
-        Radial mapping parameter.
-    modelname : str, optional
-        Name of the model. Default is an empty string.
-    cachename : str, optional
-        Name of the cache file. Default is '.slgrid_sph_cache'.
-    float_fmt_rmin, float_fmt_rmax, float_fmt_rmapping : str, optional
-        Format strings for controlling float precision.
+        Identifier of the basis model. Must be either 'sphereSL' or 'cylinder'.
+    float_fmt_rmin : str, optional
+        Format string for rmin (default ``"{:.7f}"``).
+    float_fmt_rmax : str, optional
+        Format string for rmax (default ``"{:.3f}"``).
+    float_fmt_rmapping : str, optional
+        Format string for rmapping (default ``"{:.3f}"``).
+    **kwargs : dict
+        Additional keyword arguments required depending on the basis type:
+
+        - For ``sphereSL``:
+          ['lmax', 'nmax', 'rmapping', 'modelname', 'cachename']
+
+        - For ``cylinder``:
+          ['acyl', 'hcyl', 'nmaxfid', 'lmaxfid', 'mmax', 'nmax',
+           'ncylodd', 'ncylnx', 'ncylny', 'rnum', 'pnum', 'tnum',
+           'vflag', 'logr', 'cachename']
 
     Returns
     -------
     str
         YAML configuration file contents.
-    """
-    R = np.loadtxt(modelname, skiprows=3, usecols=0)
-    rmin = R[0]
-    rmax = R[-1]
-    numr = len(R)
 
-    config_dict = {
-        "id": basis_id,
-        "parameters": {
-            "numr": numr,
-            "rmin": float_fmt_rmin.format(rmin),
-            "rmax": float_fmt_rmax.format(rmax),
-            "Lmax": lmax,
-            "nmax": nmax,
-            "rmapping": float_fmt_rmapping.format(rmapping),
-            "modelname": modelname,
-            "cachename": cachename,
+    Raises
+    ------
+    KeyError
+        If mandatory parameters for the given basis are missing.
+    FileNotFoundError
+        If ``modelname`` is required but cannot be opened.
+    ValueError
+        If the model file does not contain valid radius data.
+    """
+
+    check_basis_params(basis_id, **kwargs)
+
+    if basis_id == "sphereSL":
+        modelname = kwargs["modelname"]
+        try:
+            R = np.loadtxt(modelname, skiprows=3, usecols=0)
+        except OSError as e:
+            raise FileNotFoundError(f"Could not open model file '{modelname}'") from e
+        if R.size == 0:
+            raise ValueError(f"Model file '{modelname}' contains no radius data")
+
+        rmin, rmax, numr = R[0], R[-1], len(R)
+
+        config_dict = {
+            "id": basis_id,
+            "parameters": {
+                "numr": int(numr),
+                "rmin": rmin,
+                "rmax": rmax,
+                "Lmax": int(kwargs["lmax"]),
+                "nmax": int(kwargs["nmax"]),
+                "rmapping": float(kwargs["rmapping"]),
+                "modelname": str(modelname),
+                "cachename": str(kwargs["cachename"]),
+            },
         }
-    }
+
+    elif basis_id == "cylinder":
+        config_dict = {
+            "id": basis_id,
+            "parameters": {
+                "acyl": float(kwargs["acyl"]),
+                "hcyl": float(kwargs["hcyl"]),
+                "nmaxfid": int(kwargs["nmaxfid"]),
+                "lmaxfid": int(kwargs["lmaxfid"]),
+                "mmax": int(kwargs["mmax"]),
+                "nmax": int(kwargs["nmax"]),
+                "ncylodd": int(kwargs["ncylodd"]),
+                "ncylnx": int(kwargs["ncylnx"]),
+                "ncylny": int(kwargs["ncylny"]),
+                "rnum": int(kwargs["rnum"]),
+                "pnum": int(kwargs["pnum"]),
+                "tnum": int(kwargs["tnum"]),
+                "vflag": int(kwargs["vflag"]),
+                "logr": bool(kwargs["logr"]),
+                "cachename": str(kwargs["cachename"]),
+            },
+        }
+
     return yaml.dump(config_dict, sort_keys=False)
 
 def make_Dfit(r_data, rho_data, fit_func, 
@@ -236,7 +340,7 @@ def make_model(radius, density, Mtotal, output_filename='', physical_units=False
     }
     
     
-def make_basis(R, D, Mtotal, basis_params, modelname="test_model.txt"):
+def make_basis(R, D, Mtotal, basis_params, modelname="test_model.txt", cachename='test_cache.txt'):
     """
     Construct a basis from a given radial density profile.
 
@@ -277,7 +381,8 @@ def make_basis(R, D, Mtotal, basis_params, modelname="test_model.txt"):
         lmax=basis_params['lmax'], 
         nmax=basis_params['nmax'], 
         rmapping=R[-1], 
-        modelname=modelname
+        modelname=modelname,
+        cachename=cachename
     )
 
     basis = pyEXP.basis.Basis.factory(config)
