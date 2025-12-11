@@ -122,7 +122,7 @@ def make_model(radius, density, Mtotal, output_filename='', physical_units=False
             potential * pfac
         )
 
-    return return {
+    return {
         "radius": radius * rfac,
         "density": density * dfac,
         "mass": mass * mfac,

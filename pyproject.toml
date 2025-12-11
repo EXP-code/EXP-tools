@@ -8,8 +8,6 @@ version = "0.2.1"
 authors = [
   { name="Nico Garavito-Camargo", email="ngaravito@flatironinstitute.org" }, 
   { name="Arpit Arora", email="arora125@sas.upenn.edu"},
-  { name="Marcos", email="marcoseduardo.castillo@userena.cl"},
-  { name="Silvio Varela", email="silvio.varela@userena.cl"}
 ]
 
 description = "Library to analyze and visualize basis function expansions using pyEXP"
@@ -31,7 +29,7 @@ dependencies = [
     "h5py>=3.9.0",
     "matplotlib>=3.8",
     "healpy",
-    "k3d>=2.16.1"
+    "k3d>=2.16.1" # Make this ones optional
 ]
 
 
