@@ -79,7 +79,7 @@ def make_model(radius, density, Mtotal, output_filename='', physical_units=False
     dr = np.diff(radius)  
 
     # Midpoint integration for enclosed mass and potential
-        mass_contrib = 2.0 * np.pi * (
+    mass_contrib = 2.0 * np.pi * (
         radius[:-1]**2 * density[:-1] + radius[1:]**2 * density[1:]
     ) * dr
 
