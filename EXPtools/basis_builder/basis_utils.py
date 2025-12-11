@@ -110,10 +110,10 @@ def make_config(basis_id, float_fmt_rmin="{:.7f}", float_fmt_rmax="{:.3f}",
         If the model file does not contain valid radius data.
     """
 
-    check_basis_params(basis_id, **kwargs)
+    check_basis_params(basis_id, **params)
 
     if basis_id == "sphereSL":
-        modelname = kwargs["modelname"]
+        modelname = params["modelname"]
         try:
             R = np.loadtxt(modelname, skiprows=3, usecols=0)
         except OSError as e:
