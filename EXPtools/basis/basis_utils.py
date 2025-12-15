@@ -44,7 +44,7 @@ def load_basis(config_name, cache_dir=None):
     basis = pyEXP.basis.Basis.factory(config)
     return basis
     
-def check_basis_params(basis_id, **kwargs):
+def check_basis_params(basis_params):
     """
     Check that the required keyword arguments for a given basis are provided.
 
@@ -67,7 +67,9 @@ def check_basis_params(basis_id, **kwargs):
            'ncylnx', 'ncylny', 'rnum', 'pmun', 'tnum', 'vflag', 'logr', 'cachename']
 
     Returns
-    -------
+    -------Pipeline repo: https://github.com/jngaravitoc/XMC-Atlas/tree/main/scripts  
+
+
     bool
         Returns ``True`` if all mandatory parameters are present.
 
@@ -90,26 +92,25 @@ def check_basis_params(basis_id, **kwargs):
     KeyError: "Missing mandatory keyword arguments missing: [...]"
     """
     
-    if basis_id == 'sphereSL':
+    if basis_params['basis_id'] == 'sphereSL':
         mandatory_keys = ['Lmax', 'nmax', 'modelname', 'rmapping', 'cachename']
-        missing = [key for key in mandatory_keys if key not in kwargs]
+        missing = [key for key in mandatory_keys if key not in basis_params]
         if missing:
             raise KeyError(f"Missing mandatory keyword arguments missing: {missing}")
         return True
-    elif basis_id == 'cylinder':
+    elif basis_params['basis_id'] == 'cylinder':
         mandatory_keys = ['acyl', 'hcyl', 'nmaxfid', 'lmaxfid', 
                            'mmax', 'nmax', 'ncylodd', 'ncylnx', 
                            'ncylny', 'rnum', 'pnum', 'tnum', 'vflag', 'logr', 'cachename']  
-        missing = [key for key in mandatory_keys if key not in kwargs]
+        missing = [key for key in mandatory_keys if key not in basis_params]
         if missing:
             raise KeyError(f"Missing mandatory keyword arguments missing: {missing}")
         return True
     else: 
-        raise AttributeError(f"basis id {basis_id} not found. Please chose between sphereSL or cylinder")
+        raise AttributeError(f"basis id {basis_params['basis_id']} not found. Please chose between sphereSL or cylinder")
 
 
-def write_config(basis_id, float_fmt_rmin="{:.7f}", float_fmt_rmax="{:.3f}",
-                float_fmt_rmapping="{:.3f}", **params):
+def write_config(basis_params):
     """
     Create a YAML configuration file string for building a basis model.
 
@@ -117,12 +118,7 @@ def write_config(basis_id, float_fmt_rmin="{:.7f}", float_fmt_rmax="{:.3f}",
     ----------
     basis_id : str
         Identifier of the basis model. Must be either 'sphereSL' or 'cylinder'.
-    float_fmt_rmin : str, optional
-        Format string for rmin (default ``"{:.7f}"``).
-    float_fmt_rmax : str, optional
-        Format string for rmax (default ``"{:.3f}"``).
-    float_fmt_rmapping : str, optional
-        Format string for rmapping (default ``"{:.3f}"``).
+
     **params : dict
         Additional keyword arguments required depending on the basis type:
 
@@ -148,12 +144,12 @@ def write_config(basis_id, float_fmt_rmin="{:.7f}", float_fmt_rmax="{:.3f}",
     ValueError
         If the model file does not contain valid radius data.
     """
+    print(basis_params)
+    check_basis_params(basis_params)
 
-    check_basis_params(basis_id, **params)
-
-   
-    if basis_id == "sphereSL":
-        modelname = params["modelname"]
+    
+    if basis_params['basis_id'] == "sphereSL":
+        modelname = basis_params["modelname"]
         try:
             R = np.loadtxt(modelname, skiprows=3, usecols=0)
         except OSError as e:
@@ -162,20 +158,23 @@ def write_config(basis_id, float_fmt_rmin="{:.7f}", float_fmt_rmax="{:.3f}",
             raise ValueError(f"Model file '{modelname}' contains no radius data")
 
         rmin, rmax, numr = R[0], R[-1], len(R)
-        params["rmin"] = rmin
-        params["rmax"] = rmax
-        params["numr"] = numr
+        basis_params["rmin"] = float("{:.7f}".format(rmin))
+        basis_params["rmax"] = float("{:.3f}".format(rmax))
+        basis_params["numr"] = int(numr)
 
-
+    basis_id = basis_params['basis_id']
+    basis_params.pop('basis_id')
     config_dict = {
         "id": basis_id,
-        "parameters": params
+        "parameters": basis_params
         }
+    
+    print(config_dict)
     
     
     return yaml.dump(config_dict, sort_keys=False)
 
-def make_basis(R, D, Mtotal, basis_params, modelname="test_model.txt", cachename='test_cache.txt'):
+def make_basis(R, D, Mtotal, **basis_params):
     """
     Construct a basis from a given radial density profile.
 
@@ -203,16 +202,19 @@ def make_basis(R, D, Mtotal, basis_params, modelname="test_model.txt", cachename
       and returns the corresponding `pyEXP` basis object.
     """
 
+    if "modelname" not in basis_params.keys():
+        basis_params['modelname']="test_model.txt"
+
+    if "cachename" not in basis_params.keys():
+        basis_params['cachename']="test_cache.txt"
+    
     R, D, _, _ = make_model(
         R, D, Mtotal=Mtotal, 
-        output_filename=modelname
+        output_filename=basis_params['modelname']
     )
 
-    config = write_config(
-        basis_id=basis_params['basis_id'],
-        modelname=modelname,
-        cachename=cachename
-    )
+
+    config = write_config(basis_params)
 
     basis = pyEXP.basis.Basis.factory(config)
     return basis
