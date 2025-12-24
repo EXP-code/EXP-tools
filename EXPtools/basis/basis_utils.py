@@ -174,7 +174,7 @@ def write_config(basis_params):
     
     return yaml.dump(config_dict, sort_keys=False)
 
-def make_basis(R, D, Mtotal, **basis_params):
+def make_basis(R, D, Mtotal, basis_params, physical_units=True):
     """
     Construct a basis from a given radial density profile.
 
@@ -188,6 +188,9 @@ def make_basis(R, D, Mtotal, **basis_params):
         Total mass normalization (default is 1.0).
     basis_params : dict 
         basis parameters e.g., basis_id, nmax, lmax
+        For the descriptions of the basis_params please see the EXP description:
+        https://github.com/EXP-code/EXP-docs/blob/93207da758d34cf10092650a840cdb23180b859a/topics/yamlconfig.rst#L229
+
 
     Returns
     -------
@@ -200,6 +203,11 @@ def make_basis(R, D, Mtotal, **basis_params):
       the supplied density profile and total mass.
     - It then builds a basis either spherical (`sphereSL`) or cylindrical using `EXPtools.make_config`
       and returns the corresponding `pyEXP` basis object.
+    
+    TODO:
+    -----
+     - check cache values are consitent with basis_params
+     - informce float for rmapping
     """
 
     if "modelname" not in basis_params.keys():
@@ -208,10 +216,12 @@ def make_basis(R, D, Mtotal, **basis_params):
     if "cachename" not in basis_params.keys():
         basis_params['cachename']="test_cache.txt"
     
-    R, D, _, _ = make_model(
+    _ = make_model(
         R, D, Mtotal=Mtotal, 
-        output_filename=basis_params['modelname']
+        output_filename=basis_params['modelname'], 
+        physical_units=physical_units
     )
+
 
 
     config = write_config(basis_params)
