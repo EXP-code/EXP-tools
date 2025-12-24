@@ -2,7 +2,9 @@ import numpy as np
 import tempfile
 import os
 import yaml
-from EXPtools.basis_builder import make_model, make_config, _write_table
+from EXPtools.basis import make_model, make_config, write_table
+from EXPtools.basis import Profiles 
+
 
 def test_write_table():
     # Prepare dummy data
@@ -76,30 +78,35 @@ def test_make_config():
     print("✅ All tests passed for make_config")
 
 
-def test_makemodel():
+def test_make_model():
+    from pathlib import Path
+
+    DATA_DIR = Path(__file__).parent / "data"
     # Create simple synthetic density profile
-    radius = np.logspace(-1, 1, 5)  # 5 points from 0.1 to 10
-    density = 1.0 / radius**2       # rho ~ r^-2 (common in astrophysics)
+    TEST_PLUMMER = "test_plummer_halo.txt"
+    test_data = os.join(DATA_DIR, TEST_PLUMMER)
+    R_plummer, D_plummer, M_plummer, P_plummer = np.loadtxt(test_data, skiprows=3, unpack=True)
+    
+    radius = np.logspace(-2, 2.5, 300)  #
+    halo_model = Profiles(radius, scale_radius=10)
+    density = Profiles.plummer_density()
 
     Mtotal = 10.0  # desired total mass
 
     # Run model generation
-    r_scaled, d_scaled, m_scaled, p_scaled = make_model(radius, density, Mtotal, verbose=False)
-
+    r_scaled, d_scaled, m_scaled, p_scaled = make_model(radius, density, Mtotal,
+            physical_units=True, verbose=False)
     # Assertions
-    assert r_scaled.shape == radius.shape
-    assert d_scaled.shape == density.shape
-    assert m_scaled.shape == radius.shape
-    assert p_scaled.shape == radius.shape
+    assert r_scaled == R_plummer
+    assert d_scaled == D_plummer
+    assert m_scaled == M_plummer
+    assert p_scaled == P_plummer
 
     assert np.all(np.isfinite(r_scaled))
     assert np.all(np.isfinite(d_scaled))
     assert np.all(np.isfinite(m_scaled))
     assert np.all(np.isfinite(p_scaled))
 
-    assert np.all(r_scaled > 0)
-    assert np.all(d_scaled > 0)
-    assert np.all(m_scaled > 0)
 
     # Check mass conservation approximately
     np.testing.assert_allclose(m_scaled[-1], Mtotal, rtol=1e-2)

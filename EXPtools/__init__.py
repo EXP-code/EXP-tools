@@ -1,19 +1,21 @@
-# Allow direct access to these submodules/classes from the package
-from .basis_builder.profiles import Profiles
-from .basis_builder.basis_utils import make_basis, make_config, make_Dfit
-from .basis_builder.makemodel import make_model
-from .ios.ios import exp_coefficients
+# Re-export selected submodules and utilities at the package level
+from .basis.profiles import Profiles
+from .basis.basis_utils import load_basis, make_basis, write_config
+from .basis.makemodel import make_model
+#from .ios.ios import exp_coefficients
 from .utils.halo import ICHernquist
-from .utils import write_basis, load_basis
 from .visuals import Grid3D
-# Explicitly declare public API
+
+# Declare the public API
 __all__ = [
-            "Profiles",
-            "makebasis",
-            "write_table",
-            "make_config",
-            "exp_coefficients",
-            "makemodel",
-            "ICHernquist"
-           ]
+    "Profiles",
+    "make_basis",
+    "write_config",
+    "make_Dfit",
+    "make_model",
+    "exp_coefficients",
+    "ICHernquist",
+    "load_basis",
+    "Grid3D",
+]
 

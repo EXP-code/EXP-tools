@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "EXPtools"
-version = "0.2.1"
+version = "0.2.2"
 authors = [
   { name="Nico Garavito-Camargo", email="ngaravito@flatironinstitute.org" }, 
   { name="Arpit Arora", email="arora125@sas.upenn.edu"},
@@ -12,7 +12,7 @@ authors = [
 
 description = "Library to analyze and visualize basis function expansions using pyEXP"
 readme = "README.md"
-requires-python = ">=3.8"
+requires-python = ">=3.10"
 keywords = ["astronomy", "dynamics"]
 classifiers = [
     "Programming Language :: Python :: 3",

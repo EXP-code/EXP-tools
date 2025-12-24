@@ -1,5 +1,5 @@
 import numpy as np
-from EXPtools.basis_builder import profiles
+from EXPtools.basis import profiles
 
 # Test output of functions
 # Test document test functions 

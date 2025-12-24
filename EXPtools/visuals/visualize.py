@@ -146,7 +146,7 @@ def find_field(basis, coefficients, time=0, xyz=(0, 0, 0), property='dens',
     else:
         raise ValueError("Invalid property specified. Possible values are 'dens', 'pot', and 'force'.")
     
-def spherical_avg_prop(basis, coefficients, time=0, radius=np.linspace(0.1, 600, 100), property='dens'):
+def spherical_avg_prop(grid, basis, coefficients, time=0, radius=np.linspace(0.1, 600, 100), property='dens'):
     """
     Computes the spherically averaged value of the specified property of the field over the given radii.
 
@@ -174,52 +174,14 @@ def spherical_avg_prop(basis, coefficients, time=0, radius=np.linspace(0.1, 600,
     ValueError: 
         If the property argument is not 'dens', 'pot', or 'force'.
     """
-
-    coefficients.set_coefs(coefficients.getCoefStruct(time))
-    field = [find_field(basis, np.hstack([[rad], [0], [0]]), property=property, include_monopole=True) for rad in radius]
-
-    if property == 'force':
-        return np.vstack(field), radius
-
-    return np.array(field), radius
-
-
-def make_grid(gridtype, gridspecs, rgrid, representation='cartesian'):
-    """
-    Make a variety of grids in different coordinate representations
-
-    Parameters
-    ----------
-    gridtype:
-    npoints:
-    rgrid:
-    representation:
-
-
-    Returns:
-    --------
-    coordinates 
+    Grid3D()
+    fields = pyEXP.field.FieldGenerator(times, mesh)
+    points = field.points(basis, coefs)
     
-    """
-    
-    if gridtype == 'spherical':
-        arcostheta = np.linspace(-1, 1, gridspecs['theta_bins'])
-        phi = np.linspace(0, 2*np.pi, gridspecs['phi_bins'])
-        theta_mesh, phi_mesh = np.meshgrid(np.arccos(arcostheta), phi)
+    return radius, profile
 
-        if representation == 'cartesian':
-            x = rgrid  * np.sin(theta_mesh) * np.cos(phi_mesh)
-            y = rgrid  * np.sin(theta_mesh) * np.sin(phi_mesh)
-            z = rgrid  * np.cos(theta_mesh) 
-            ## TODO: fix this return to allow the user to chose what to return
-            return np.array([x, y, z]), theta_mesh, phi_mesh
-        
-        elif representation == 'spherical':
-            return np.array([theta_mesh, phi_mesh])
-  
-    else:
-        print('gridtype {} not implemented'.format(gridtype))  
-        return 0 
+
+
 
 def return_fields_in_grid(basis, coefficients, times=[0], 
                        projection='3D', proj_plane=0, 
