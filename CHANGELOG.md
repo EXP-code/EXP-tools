@@ -5,7 +5,8 @@
 ### Added
 - Docstrings in basis module
 - Support to build cylindrical basis
-
+- Tests for basis were updated to match refactor changes
+- Tests for Profiles were added 
 ### Changed
 - Rename basis_build folder to match pyEXP naming convention
 - Basis module was refactor
