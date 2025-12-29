@@ -4,7 +4,7 @@ import os
 import yaml
 from EXPtools.basis.makemodel import make_model, write_table
 from EXPtools.basis.basis_utils import load_basis, write_config
-from EXPtools.basis.Profiles import profiles 
+from EXPtools.basis.profiles import Profiles 
 
 def test_load_basis():
 
