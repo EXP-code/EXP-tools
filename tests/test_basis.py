@@ -2,6 +2,7 @@ import numpy as np
 import tempfile
 import os
 import yaml
+from pathlib import Path
 from EXPtools.basis.makemodel import make_model, write_table
 from EXPtools.basis.basis_utils import load_basis, write_config
 from EXPtools.basis.profiles import Profiles 
@@ -29,7 +30,7 @@ def test_write_table():
     # Create a temporary file
     with tempfile.NamedTemporaryFile(mode='r+', delete=False) as tmp:
         filename = tmp.name
-        _write_table(filename, rvals, dvals, mvals, pvals)
+        write_table(filename, rvals, dvals, mvals, pvals)
 
     # Read back the file and check contents
     with open(filename, 'r') as f:
@@ -44,14 +45,14 @@ def test_write_table():
     os.remove(filename)
 
 
-def test_make_config():
-    """Test the make_config function for both 'sphereSL' and 'cylinder'."""
+def test_write_config():
+    """Test the write_config function for both 'sphereSL' and 'cylinder'."""
 
     # ---- Test sphereSL ----
     R = np.linspace(1e-3, 300, 400)
     np.savetxt("dummy_model.txt", np.c_[R, R, R])  # 3 columns, like your models
 
-    yaml_str = make_config(
+    yaml_str = write_config(
         basis_id="sphereSL",
         lmax=8, nmax=10, rmapping=R[-1],
         modelname="dummy_model.txt",
@@ -68,7 +69,7 @@ def test_make_config():
     assert "rmin_str" in params and "rmax_str" in params
 
     # ---- Test cylinder ----
-    yaml_str_cyl = make_config(
+    yaml_str_cyl = write_config(
         basis_id="cylinder",
         acyl=1.5, hcyl=2.5,
         nmaxfid=20, lmaxfid=10, mmax=5, nmax=8,
@@ -88,11 +89,10 @@ def test_make_config():
     assert isinstance(params_cyl["ncylny"], int)
     assert isinstance(params_cyl["cachename"], str)
 
-    print("✅ All tests passed for make_config")
+    print("✅ All tests passed for write_config")
 
 
 def test_make_model():
-    from pathlib import Path
 
     DATA_DIR = Path(__file__).parent / "data"
     # Create simple synthetic density profile
