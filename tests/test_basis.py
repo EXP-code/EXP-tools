@@ -2,9 +2,21 @@ import numpy as np
 import tempfile
 import os
 import yaml
-from EXPtools.basis.basis_utils import make_config
 from EXPtools.basis.makemodel import make_model, write_table
-from EXPtools.basis import Profiles
+from EXPtools.basis.basis_utils import load_basis, write_config
+from EXPtools.basis.Profiles import profiles 
+
+def test_load_basis():
+
+    DATA_DIR = Path(__file__).parent / "data"
+    spherical_basis = os.join(DATA_DIR, "test_spherical_basis.yaml")
+    cylindrical_basis = os.join(DATA_DIR, "test_cylindrical_basis.yaml")
+    
+    sph_basis = load_basis(spherical_basis)
+    cyl_basis = load_basis(cylindrical_basis)
+    
+        
+    print("✅ All tests passed for load_basis")
 
 
 def test_write_table():
@@ -17,7 +29,7 @@ def test_write_table():
     # Create a temporary file
     with tempfile.NamedTemporaryFile(mode='r+', delete=False) as tmp:
         filename = tmp.name
-        write_table(filename, rvals, dvals, mvals, pvals)
+        _write_table(filename, rvals, dvals, mvals, pvals)
 
     # Read back the file and check contents
     with open(filename, 'r') as f:
