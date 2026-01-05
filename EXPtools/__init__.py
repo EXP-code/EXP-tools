@@ -2,9 +2,8 @@
 from .basis.profiles import Profiles
 from .basis.basis_utils import load_basis, make_basis, write_config
 from .basis.makemodel import make_model
-#from .ios.ios import exp_coefficients
 from .utils.halo import ICHernquist
-from .visuals import Grid3D
+from .visuals import Grid3D, use_exptools_style
 
 # Declare the public API
 __all__ = [
@@ -17,5 +16,6 @@ __all__ = [
     "ICHernquist",
     "load_basis",
     "Grid3D",
+    "use_exptools_style"
 ]
 

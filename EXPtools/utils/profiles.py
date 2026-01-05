@@ -113,10 +113,8 @@ class Profiles:
         """
         prefac = 0.5 * (1.0 - special.erf((self.ra - rcen) / wcen))
         return prefac * self.amp * self.ra ** -self.alpha * (1 + self.ra) ** (-self.beta + self.alpha)
-        
-        
-        
- def evaluate_density_profile(radii, amplitude, scale_radius, profile_func="power_halo", **kwargs):
+
+def evaluate_density_profile(radii, amplitude, scale_radius, profile_func="power_halo", **kwargs):
     """
     Evaluate a dark matter density profile using any method of the Profiles class.
 

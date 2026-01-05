@@ -21,8 +21,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Renamed `basis_build` folder to match pyEXP naming conventions.
 - `basis` module refactored.
 - Moved `profiles.py` from `basis` to `utils/`.
+- CI now checks python versions up to 3.13
 
 ### Fixed
 - Fixed a typo in `make_model`.
 - Prevented `log10` of zero in density smoothing.
 
+### Deprecated
+- No support for python 3.9
+- No support for numpy <2.0
