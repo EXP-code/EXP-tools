@@ -16,6 +16,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Unit tests performed on a Milky Way simulated galaxy.
 - Matplotlib `exptools` style implemented in `utils/`.
 - Unit tests for the plotting style.
+- Grid3D tutorial
 
 ### Changed
 - Renamed `basis_build` folder to match pyEXP naming conventions.
@@ -26,6 +27,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Fixed
 - Fixed a typo in `make_model`.
 - Prevented `log10` of zero in density smoothing.
+- Fixed Grid3D tests
 
 ### Deprecated
 - No support for python 3.9
