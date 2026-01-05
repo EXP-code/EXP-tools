@@ -113,3 +113,50 @@ class Profiles:
         """
         prefac = 0.5 * (1.0 - special.erf((self.ra - rcen) / wcen))
         return prefac * self.amp * self.ra ** -self.alpha * (1 + self.ra) ** (-self.beta + self.alpha)
+        
+        
+        
+ def evaluate_density_profile(radii, amplitude, scale_radius, profile_func="power_halo", **kwargs):
+    """
+    Evaluate a dark matter density profile using any method of the Profiles class.
+
+    Parameters
+    ----------
+    radii : array-like
+        Radial distances at which to evaluate the density profile.
+    amplitude : float
+        Normalization of the profile.
+    scale_radius : float
+        Characteristic scale radius of the halo.
+    profile_func : str or callable, optional
+        Profile method to use. Can be:
+        - A string matching any method name in `Profiles` (e.g., "power_halo",
+          "power_halo_rolloff", "plummer_density", "two_power_density_with_rolloff").
+        - A callable that accepts a `Profiles` instance and returns an ndarray.
+        Default is "power_halo".
+    **kwargs :
+        Additional keyword arguments to pass to the profile method
+        (e.g., core radius, rolloff parameters, etc.)
+
+    Returns
+    -------
+    ndarray
+        Density values at each radius.
+    """
+
+    # Initialize the profile
+    profile = Profiles(radii, scale_radius, amplitud=amplitude, alpha=1.0, beta=3.0)
+
+    # Determine the function to call
+    if isinstance(profile_func, str):
+        if not hasattr(profile, profile_func):
+            raise ValueError(f"Profiles has no method '{profile_func}'")
+        func = getattr(profile, profile_func)
+    elif callable(profile_func):
+        func = lambda: profile_func(profile)
+    else:
+        raise TypeError("profile_func must be a string method name or a callable")
+
+    # Call the selected profile function with provided kwargs
+    return func(**kwargs)
+

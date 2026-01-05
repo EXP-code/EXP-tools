@@ -222,8 +222,6 @@ def make_basis(R, D, Mtotal, basis_params, physical_units=True):
         physical_units=physical_units
     )
 
-
-
     config = write_config(basis_params)
 
     basis = pyEXP.basis.Basis.factory(config)
