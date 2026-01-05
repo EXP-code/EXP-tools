@@ -44,6 +44,11 @@ test = [
 where = ["."]
 include = ["EXPtools", "EXPtools.*"]
 
+
+[tool.setuptools.package-data]
+EXPtools = ["visuals/*.mplstyle"]
+
+
 [project.urls]
 Homepage = "https://github.com/EXP_code/EXPtools/"
 Issues = "https://github.com/EXP_code/EXPtools/issues"

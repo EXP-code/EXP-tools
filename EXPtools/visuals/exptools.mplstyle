@@ -1,0 +1,11 @@
+axes.linewidth      : 1.2
+axes.labelsize      : 14
+xtick.direction     : in
+ytick.direction     : in
+xtick.top           : True
+ytick.right         : True
+font.family         : serif
+mathtext.fontset    : cm
+figure.dpi          : 150
+savefig.dpi         : 300
+
