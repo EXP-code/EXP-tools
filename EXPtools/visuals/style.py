@@ -20,7 +20,8 @@ def use_exptools_style(mathtext_fontset="cm", usetex=False):
     called explicitly by the user.
     """
     # Load the base style
-    style_path = resources.files("EXPtools.visuals").joinpath("exptools.mplstyle")
+    style_pkg = resources.files("EXPtools.visuals")
+    style_path = style_pkg.joinpath("exptools.mplstyle")
     plt.style.use(str(style_path))
 
     # Override mathtext font

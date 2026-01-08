@@ -2,9 +2,9 @@ import numpy as np
 import tempfile
 import os
 import yaml
-from EXPtools.basis.basis_utils import make_config
+from EXPtools.basis.basis_utils import write_config
 from EXPtools.basis.makemodel import make_model, write_table
-from EXPtools.basis import Profiles
+from EXPtools.utils import Profiles
 
 
 def test_write_table():
@@ -32,14 +32,14 @@ def test_write_table():
     os.remove(filename)
 
 
-def test_make_config():
+def test_write_config():
     """Test the make_config function for both 'sphereSL' and 'cylinder'."""
 
     # ---- Test sphereSL ----
     R = np.linspace(1e-3, 300, 400)
     np.savetxt("dummy_model.txt", np.c_[R, R, R])  # 3 columns, like your models
 
-    yaml_str = make_config(
+    yaml_str = write_config(
         basis_id="sphereSL",
         lmax=8, nmax=10, rmapping=R[-1],
         modelname="dummy_model.txt",
@@ -56,7 +56,7 @@ def test_make_config():
     assert "rmin_str" in params and "rmax_str" in params
 
     # ---- Test cylinder ----
-    yaml_str_cyl = make_config(
+    yaml_str_cyl = write_config(
         basis_id="cylinder",
         acyl=1.5, hcyl=2.5,
         nmaxfid=20, lmaxfid=10, mmax=5, nmax=8,
@@ -85,11 +85,11 @@ def test_make_model():
     DATA_DIR = Path(__file__).parent / "data"
     # Create simple synthetic density profile
     TEST_PLUMMER = "test_plummer_halo.txt"
-    test_data = os.join(DATA_DIR, TEST_PLUMMER)
+    test_data = os.path.join(DATA_DIR, TEST_PLUMMER)
     R_plummer, D_plummer, M_plummer, P_plummer = np.loadtxt(test_data, skiprows=3, unpack=True)
     
     radius = np.logspace(-2, 2.5, 300)  #
-    halo_model = Profiles(radius, scale_radius=10)
+    Profiles(radius, scale_radius=10)
     density = Profiles.plummer_density()
 
     Mtotal = 10.0  # desired total mass

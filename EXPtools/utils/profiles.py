@@ -114,7 +114,7 @@ class Profiles:
         prefac = 0.5 * (1.0 - special.erf((self.ra - rcen) / wcen))
         return prefac * self.amp * self.ra ** -self.alpha * (1 + self.ra) ** (-self.beta + self.alpha)
 
-def evaluate_density_profile(radii, amplitude, scale_radius, profile_func="power_halo", **kwargs):
+def evaluate_density_profile(radii, amplitude, scale_radius, alpha=1.0, beta=3.0, profile_func="power_halo", **kwargs):
     """
     Evaluate a dark matter density profile using any method of the Profiles class.
 
@@ -143,7 +143,13 @@ def evaluate_density_profile(radii, amplitude, scale_radius, profile_func="power
     """
 
     # Initialize the profile
-    profile = Profiles(radii, scale_radius, amplitud=amplitude, alpha=1.0, beta=3.0)
+    profile = Profiles(
+        radii,
+        scale_radius,
+        amplitud=amplitude,
+        alpha=alpha,
+        beta=beta,
+    )
 
     # Determine the function to call
     if isinstance(profile_func, str):
@@ -151,7 +157,8 @@ def evaluate_density_profile(radii, amplitude, scale_radius, profile_func="power
             raise ValueError(f"Profiles has no method '{profile_func}'")
         func = getattr(profile, profile_func)
     elif callable(profile_func):
-        func = lambda: profile_func(profile)
+        def func():
+            return profile_func(profile)
     else:
         raise TypeError("profile_func must be a string method name or a callable")
 

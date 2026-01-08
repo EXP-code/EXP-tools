@@ -3,7 +3,6 @@ Routines for defining and handling unit systems.
 """
 
 import astropy.units as u
-import astropy.constants as const
 import numpy as np
 
 def define_exp_units(M_phys, R_phys, G, verbose=False):
@@ -44,8 +43,13 @@ def define_exp_units(M_phys, R_phys, G, verbose=False):
     
     Example
     -------
-    To define the conversion from e.g. Gadget default units, use
-    expL, expM, expV, expT = define_exp_units(M_phys=1.*u.Msun, R_phys=1.*u.kpc, G=const.G.to(u.kpc/(1e10*u.Msun)*u.km**2/u.s**2))
+    To define the conversion from e.g. Gadget default units, use::
+
+        expL, expM, expV, expT = define_exp_units(
+            M_phys=1.0 * u.Msun,
+            R_phys=1.0 * u.kpc,
+            G=const.G.to(u.kpc / (1e10 * u.Msun) * u.km**2 / u.s**2),
+        )
     """
     
     if verbose:

@@ -19,7 +19,7 @@ def field3Dcontour(field, contour_range, contour_name, size, **kwargs):
     
     """
     
-    field_max = np.max(np.abs(field))
+    np.max(np.abs(field))
     #field_min = np.min(field)
 
 

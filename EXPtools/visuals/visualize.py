@@ -6,8 +6,6 @@ implemented.
 """
 import numpy as np
 import matplotlib.pyplot as plt
-import pyEXP
-from EXPtools.visuals.grid import Grid3D
 
 def make_basis_plot(basis, basis_props, savefile=None, nsnap='mean', y=0.92, dpi=200, **kwargs):
     """
@@ -41,7 +39,7 @@ def make_basis_plot(basis, basis_props, savefile=None, nsnap='mean', y=0.92, dpi
 
     # Create subplots and plot potential for each l and n 
 
-    ncols = (lmax-1)//5 + 1
+    (lmax-1)//5 + 1
 
     r = np.linspace(lrmin, lrmax, rnum)
     r = np.power(10.0, r) 
@@ -52,11 +50,11 @@ def make_basis_plot(basis, basis_props, savefile=None, nsnap='mean', y=0.92, dpi
 
     ax = ax.flatten()
     
-    for l in range(lmax):
-        ax[l].set_title(f"$\ell = {l}$", y=0.8, fontsize=16)  
+    for ele in range(lmax):
+        ax[ele].set_title(f"$\ell = {ele}$", y=0.8, fontsize=16)  
         for n in range(nmax):
-            ax[l].semilogx(r, halo_grid[l][n]['potential'],
-                           '-', label="n={}".format(n), lw=0.5)
+            ax[ele].semilogx(r, halo_grid[ele][n]['potential'],
+                             ls='-', label="n={}".format(n), lw=0.5)
 
     # Add labels and main title
     fig.supylabel('Potential', weight='bold', x=-0.02)

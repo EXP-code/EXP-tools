@@ -99,9 +99,11 @@ def check_basis_params(basis_params):
             raise KeyError(f"Missing mandatory keyword arguments missing: {missing}")
         return True
     elif basis_params['basis_id'] == 'cylinder':
-        mandatory_keys = ['acyl', 'hcyl', 'nmaxfid', 'lmaxfid', 
-                           'mmax', 'nmax', 'ncylodd', 'ncylnx', 
-                           'ncylny', 'rnum', 'pnum', 'tnum', 'vflag', 'logr', 'cachename']  
+        mandatory_keys = [
+            'acyl', 'hcyl', 'nmaxfid', 'lmaxfid', 'mmax', 'nmax',
+            'ncylodd', 'ncylnx', 'ncylny', 'rnum', 'pnum', 'tnum',
+            'vflag', 'logr', 'cachename',
+        ]
         missing = [key for key in mandatory_keys if key not in basis_params]
         if missing:
             raise KeyError(f"Missing mandatory keyword arguments missing: {missing}")
@@ -110,18 +112,21 @@ def check_basis_params(basis_params):
         raise AttributeError(f"basis id {basis_params['basis_id']} not found. Please chose between sphereSL or cylinder")
 
 
-def write_config(basis_params):
+def write_config(
+    basis_params,
+    write_yaml=False,
+    filename="basis_config.yaml",
+    ):
+
     """
     Create a YAML configuration file string for building a basis model.
 
     Parameters
     ----------
-    basis_id : str
-        Identifier of the basis model. Must be either 'sphereSL' or 'cylinder'.
-
-    **params : dict
-        Additional keyword arguments required depending on the basis type:
-
+    basis_params : dict
+        Dictionary containing basis configuration parameters. Must include
+        the key ``'basis_id'`` and all required parameters for the chosen basis.
+    
         - For ``sphereSL``:
           ['lmax', 'nmax', 'rmapping', 'modelname', 'cachename']
 
@@ -129,7 +134,15 @@ def write_config(basis_params):
           ['acyl', 'hcyl', 'nmaxfid', 'lmaxfid', 'mmax', 'nmax',
            'ncylodd', 'ncylnx', 'ncylny', 'rnum', 'pnum', 'tnum',
            'vflag', 'logr', 'cachename']
+    
+    write_config : bool, optional
+        If True, write the YAML configuration to disk. Default is True.
 
+    filename : str, optional
+        Output filename for the YAML configuration. Only used if
+        ``write_config=True``. Default is ``'basis_config.yaml'``.
+
+    
     Returns
     -------
     str
@@ -144,10 +157,8 @@ def write_config(basis_params):
     ValueError
         If the model file does not contain valid radius data.
     """
-    print(basis_params)
     check_basis_params(basis_params)
 
-    
     if basis_params['basis_id'] == "sphereSL":
         modelname = basis_params["modelname"]
         try:
@@ -168,13 +179,17 @@ def write_config(basis_params):
         "id": basis_id,
         "parameters": basis_params
         }
-    
-    print(config_dict)
-    
-    
-    return yaml.dump(config_dict, sort_keys=False)
+    print('OK')
+    yaml_str = yaml.dump(config_dict, sort_keys=False)
+    print('here')
+    if write_yaml:
+        with open(filename, "w") as f:
+            f.write(yaml_str)
+    print('----')
+    return yaml_str
 
-def make_basis(R, D, Mtotal, basis_params, physical_units=True):
+
+def make_basis(R, D, Mtotal, basis_params, physical_units=True, write_yaml=False):
     """
     Construct a basis from a given radial density profile.
 
@@ -188,8 +203,9 @@ def make_basis(R, D, Mtotal, basis_params, physical_units=True):
         Total mass normalization (default is 1.0).
     basis_params : dict 
         basis parameters e.g., basis_id, nmax, lmax
-        For the descriptions of the basis_params please see the EXP description:
-        https://github.com/EXP-code/EXP-docs/blob/93207da758d34cf10092650a840cdb23180b859a/topics/yamlconfig.rst#L229
+        For the descriptions of the basis_params please see the EXP docs:
+        https://github.com/EXP-code/EXP-docs/blob/93207da758d34cf10092650a84
+        0cdb23180b859a/topics/yamlconfig.rst#L229
 
 
     Returns
@@ -204,10 +220,6 @@ def make_basis(R, D, Mtotal, basis_params, physical_units=True):
     - It then builds a basis either spherical (`sphereSL`) or cylindrical using `EXPtools.make_config`
       and returns the corresponding `pyEXP` basis object.
     
-    TODO:
-    -----
-     - check cache values are consitent with basis_params
-     - informce float for rmapping
     """
 
     if "modelname" not in basis_params.keys():
@@ -221,8 +233,8 @@ def make_basis(R, D, Mtotal, basis_params, physical_units=True):
         output_filename=basis_params['modelname'], 
         physical_units=physical_units
     )
-
-    config = write_config(basis_params)
+    print('Done making model')
+    config = write_config(basis_params, write_yaml)
 
     basis = pyEXP.basis.Basis.factory(config)
     return basis

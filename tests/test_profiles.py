@@ -1,5 +1,5 @@
 import numpy as np
-from EXPtools.basis import profiles
+from EXPtools.utils import profiles
 
 # Test output of functions
 # Test document test functions 
@@ -19,14 +19,14 @@ def test_profile_class():
 
     # NFW 
     NFW = profiles.Profiles(r, scale_length, alpha1, beta2)
-    rho_NFW = NFW.powerhalo()
+    NFW.power_halo()
 
     # Hernquist 
     Hernquist = profiles.Profiles(r, scale_length, alpha1, beta3)
-    rho_Hern = Hernquist.powerhalo()
+    Hernquist.power_halo()
 
     # Single power law
     SPL = profiles.Profiles(r, scale_length, alpha2, beta0)
-    rho_SPL = SPL.powerhalo()
+    SPL.power_halo()
 
     return None
