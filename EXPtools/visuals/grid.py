@@ -1,5 +1,6 @@
+from typing import Sequence, Tuple, Optional
 import numpy as np
-
+from numpy.typing import ArrayLike
 
 class Grid3D:
     """
@@ -61,8 +62,14 @@ class Grid3D:
     grid : ndarray, shape (N, 3)
         Flattened grid of coordinates in the native system.
     """
+    Range = Tuple[float, float]
 
-    def __init__(self, system, ranges, num_points=10, r_bins=None):
+    def __init__(
+    	self,
+    	system: str,
+    	ranges: Sequence[Optional[Range]],
+    	num_points: int | Sequence[int] = 10,
+        r_bins: Optional[ArrayLike] = None,):
         """
         Initialize a 3D coordinate grid.
 
@@ -116,7 +123,7 @@ class Grid3D:
             If ``r_bins`` is provided for a non-spherical coordinate system.
         """
 
-
+        self.r_bins: Optional[np.ndarray]  # explicit attribute type
         self.system = system.lower()
         self.supported_systems = ['cartesian', 'spherical', 'cylindrical']
 
@@ -133,7 +140,7 @@ class Grid3D:
         if len(num_points) != 3 or not all(isinstance(n, int) and n > 0 for n in num_points):
             raise ValueError("num_points must be an int or a list of 3 positive integers")
 
-        # Validate ranges
+        # Check valid ranges
         if self.system == 'cartesian':
             if len(ranges) != 3:
                 raise ValueError("Cartesian requires 3 ranges")
@@ -147,19 +154,20 @@ class Grid3D:
         if r_bins is not None:
             if self.system != 'spherical':
                 raise ValueError("r_bins can only be used with spherical grids")
-
-            r_bins = np.asarray(r_bins, dtype=float)
-            if r_bins.ndim != 1 or np.any(r_bins <= 0):
+            r_bins_array = np.asarray(r_bins, dtype=float)
+            if r_bins_array.ndim != 1 or np.any(r_bins_array <= 0):
                 raise ValueError("r_bins must be a 1D array of positive values")
-            if not np.all(np.diff(r_bins) > 0):
+            if not np.all(np.diff(r_bins_array) > 0):
                 raise ValueError("r_bins must be strictly increasing")
+            self.r_bins = r_bins_array
+        else:
+            self.r_bins = None
 
-        self.r_bins = r_bins
         self.ranges = ranges
         self.num_points = num_points
         self.grid = self._generate_grid()
 
-    def _generate_grid(self):
+    def _generate_grid(self) -> np.ndarray:
         """
         Generate the grid in the native coordinate system.
 
@@ -169,36 +177,61 @@ class Grid3D:
             Flattened coordinate grid.
         """
         if self.system == 'spherical':
-
             if self.r_bins is not None:
-                r = self.r_bins
+                r: np.ndarray = self.r_bins
             else:
-                # Evenly distributed by volume
-                r_min, r_max = self.ranges[0]
-                r_points = np.linspace(r_min**3, r_max**3, self.num_points[0]) 
+                r_range = self.ranges[0]
+                assert r_range is not None, "Spherical grid requires r range"
+                r_min, r_max = r_range
+                r_points = np.linspace(r_min**3, r_max**3, self.num_points[0])
                 r = r_points ** (1/3)
 
-            u = np.linspace(-1, 1, self.num_points[1])
-            theta = np.arccos(u)
-            phi = np.linspace(0, 2 * np.pi, self.num_points[2], endpoint=False)
-            
+            u: np.ndarray = np.linspace(-1, 1, self.num_points[1])
+            theta: np.ndarray = np.arccos(u)
+            phi: np.ndarray = np.linspace(0, 2 * np.pi, self.num_points[2], endpoint=False)
+
             R, Theta, Phi = np.meshgrid(r, theta, phi, indexing='ij')
             return np.stack([R, Theta, Phi], axis=-1).reshape(-1, 3)
 
         elif self.system == 'cylindrical':
-            rho = np.linspace(*self.ranges[0], self.num_points[0])
-            phi = np.linspace(0, 2 * np.pi, self.num_points[1], endpoint=False)
-            z = np.linspace(*self.ranges[2], self.num_points[2])
-            Rho, Phi, Z = np.meshgrid(rho, phi, z, indexing='ij')
-            return np.stack([Rho, Phi, Z], axis=-1).reshape(-1, 3)
+            rho_range = self.ranges[0]
+            z_range = self.ranges[2]
+            assert rho_range is not None, "Cylindrical grid requires rho range"
+            assert z_range is not None, "Cylindrical grid requires z range"
+
+            rho_min, rho_max = rho_range
+            z_min, z_max = z_range
+
+            rho: np.ndarray = np.linspace(rho_min, rho_max, self.num_points[0])
+            phi_cyl: np.ndarray = np.linspace(0, 2 * np.pi, self.num_points[1], endpoint=False)
+            z: np.ndarray = np.linspace(z_min, z_max, self.num_points[2])
+
+            Rho, Phi_cyl, Z = np.meshgrid(rho, phi_cyl, z, indexing='ij')
+            return np.stack([Rho, Phi_cyl, Z], axis=-1).reshape(-1, 3)
 
         elif self.system == 'cartesian':
-            axes = [
-                np.linspace(start, stop, n)
-                for (start, stop), n in zip(self.ranges, self.num_points)
+            # Make a local typed copy of ranges
+            ranges_seq: Sequence[Tuple[float, float]] = [
+                r if r is not None else (0.0, 1.0) for r in self.ranges  # fallback just in case
             ]
+
+            ranges_checked: list[Tuple[float, float]] = []
+            for i, r in enumerate(ranges_seq):
+                if not isinstance(r, tuple):
+                    raise ValueError(f"Cartesian grid requires tuple range for axis {i}, got {type(r)}")
+                ranges_checked.append(r)
+
+            axes: list[np.ndarray] = [
+                np.linspace(start, stop, n)
+                for (start, stop), n in zip(ranges_checked, self.num_points)
+            ]
+
             mesh = np.meshgrid(*axes, indexing='ij')
             return np.stack(mesh, axis=-1).reshape(-1, 3)
+
+        else:
+            raise ValueError(f"Unsupported system: {self.system}")
+
 
 
     def to(self, target_system):

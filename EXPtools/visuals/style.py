@@ -30,4 +30,3 @@ def use_exptools_style(mathtext_fontset="cm", usetex=False):
 
     # Optionally enable LaTeX rendering
     plt.rcParams["text.usetex"] = usetex
-

@@ -139,5 +139,3 @@ class Projections:
             print(f"* Saving figure in {kwargs['figname']}")
             plt.savefig(kwargs['figname'], bbox_inches='tight')
             plt.close()
-
-
