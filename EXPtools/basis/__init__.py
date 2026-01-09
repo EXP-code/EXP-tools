@@ -3,6 +3,7 @@ from .basis_utils import (
     check_basis_params,
     write_config,
     make_basis,
+    config_dict_to_yaml,
 )
 from .makemodel import (
     write_table,
@@ -16,4 +17,5 @@ __all__ = [
     "make_basis",
     "write_table",
     "make_model",
+    "config_dict_to_yaml",
 ]

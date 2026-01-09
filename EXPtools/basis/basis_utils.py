@@ -5,13 +5,13 @@ import numpy as np
 import pyEXP
 from EXPtools.basis.makemodel import make_model
 
-def load_basis(config_name, cache_dir=None):
+def load_basis(config_file, cache_dir=None):
     """
     Load a basis configuration from a YAML file and initialize a Basis object.
 
     Parameters
     ----------
-    config_name : str
+    config_file : str
         Path to the YAML configuration file. If the provided filename does not 
         end with `.yaml`, the extension is automatically appended.
     cache_dir : str (optional)
@@ -30,18 +30,28 @@ def load_basis(config_name, cache_dir=None):
     """
 
     # Check file existence
-    if not os.path.exists(config_name):
-        raise FileNotFoundError(f"Configuration file not found: {config_name}")
+    if not os.path.exists(config_file):
+        raise FileNotFoundError(f"Configuration file not found: {config_file}")
 
     # Load YAML safely
-    with open(config_name, "r") as f:
-        config = yaml.load(f, Loader=yaml.FullLoader)
+    #with open(config_file) as f:
+    #    config_yaml = f.read()
+    with open(config_file, "r") as f:
+        config_yaml = yaml.safe_load(f)
+    
+    
+    modelfile = config_yaml["parameters"]["modelname"]
+    if not os.path.exists(modelfile):
+        raise FileNotFoundError(f"Modelname file not found: {modelfile}")
 
-    if cache_dir:
-        config = re.sub(r"(modelname:\s*)(\S+)", rf"\1{cache_dir}\2", config)
-        config = re.sub(r"(cachename:\s*)(\S+)", rf"\1{cache_dir}\2", config)
+    #if cache_dir:
+    #    config_yaml = re.sub(r"(modelname:\s*)(\S+)", rf"\1{cache_dir}\2", config_yaml)
+    #    config_yaml = re.sub(r"(cachename:\s*)(\S+)", rf"\1{cache_dir}\2", config_yaml)
     # Build basis from configuration
-    basis = pyEXP.basis.Basis.factory(config)
+    config_str = yaml.safe_dump(config_yaml)
+    
+    
+    basis = pyEXP.basis.Basis.factory(config_str)
     return basis
     
 def check_basis_params(basis_params):
@@ -112,11 +122,12 @@ def check_basis_params(basis_params):
         raise AttributeError(f"basis id {basis_params['basis_id']} not found. Please chose between sphereSL or cylinder")
 
 
-def write_config(
-    basis_params,
-    write_yaml=False,
-    filename="basis_config.yaml",
-    ):
+def write_config(basis, basis_filename):
+    with open(basis_filename, 'w') as file:
+        yaml.safe_dump(basis, file, default_flow_style=False)
+
+
+def config_dict_to_yaml(basis_params):
 
     """
     Create a YAML configuration file string for building a basis model.
@@ -156,7 +167,9 @@ def write_config(
         If ``modelname`` is required but cannot be opened.
     ValueError
         If the model file does not contain valid radius data.
+    
     """
+    basis_params = basis_params.copy()  
     check_basis_params(basis_params)
 
     if basis_params['basis_id'] == "sphereSL":
@@ -173,31 +186,25 @@ def write_config(
         basis_params["rmax"] = float("{:.3f}".format(rmax))
         basis_params["numr"] = int(numr)
 
-    basis_id = basis_params['basis_id']
-    basis_params.pop('basis_id')
+    #remove id
+    basis_id = basis_params.pop("basis_id")
     config_dict = {
         "id": basis_id,
         "parameters": basis_params
         }
-    print('OK')
-    yaml_str = yaml.dump(config_dict, sort_keys=False)
-    print('here')
-    if write_yaml:
-        with open(filename, "w") as f:
-            f.write(yaml_str)
-    print('----')
-    return yaml_str
+    config_yaml = yaml.dump(config_dict, sort_keys=False)
+    return config_yaml
+    
 
-
-def make_basis(R, D, Mtotal, basis_params, physical_units=True, write_yaml=False):
+def make_basis(radii, density, Mtotal, basis_params, physical_units=True, write_basis=False, basis_filename='test_config.yaml'):
     """
-    Construct a basis from a given radial density profile.
+    Construct a basis from a density profile.
 
     Parameters
     ----------
-    R : array_like
+    radii : array_like
         Radial grid points (e.g., radii at which density `D` is defined).
-    D : array_like
+    density : array_like
         Density values corresponding to each radius in `R`.
     Mtotal : float, optional
         Total mass normalization (default is 1.0).
@@ -214,7 +221,7 @@ def make_basis(R, D, Mtotal, basis_params, physical_units=True, write_yaml=False
         A basis object initialized with the given density model.
 
     Notes
-    -----
+    ----- 
     - This function wraps `makemodel.makemodel` to generate a model from 
       the supplied density profile and total mass.
     - It then builds a basis either spherical (`sphereSL`) or cylindrical using `EXPtools.make_config`
@@ -229,12 +236,20 @@ def make_basis(R, D, Mtotal, basis_params, physical_units=True, write_yaml=False
         basis_params['cachename']="test_cache.txt"
     
     _ = make_model(
-        R, D, Mtotal=Mtotal, 
+        radii, density, Mtotal=Mtotal, 
         output_filename=basis_params['modelname'], 
         physical_units=physical_units
     )
     print('Done making model')
-    config = write_config(basis_params, write_yaml)
+    config = config_dict_to_yaml(basis_params)
+    #if write_basis == True:
+    #    yaml_config = yaml.safe_load(config)
+    #    write_config(yaml_config, basis_filename=basis_filename)
+    #basis = load_basis(basis_filename)
+    
+    if write_basis:
+        yaml_config = yaml.safe_load(config)
+        write_config(yaml_config, basis_filename)
+        return load_basis(basis_filename)
 
-    basis = pyEXP.basis.Basis.factory(config)
-    return basis
+    return pyEXP.basis.Basis.factory(config)
