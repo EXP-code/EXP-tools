@@ -4,6 +4,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).  
 
 
+## [0.3.0] – 2026-01-06
+
+### Added
+- Support to compute EXP coefficients from particle positions and masses.
+- MPI support for EXP coefficient computation.
+- Unit tests for EXP coefficient computation.
+- Spherical density profile computation using spherical `Grid3D`
+- Functionality to write a yaml file with the basis in `write_config`
+
+### Removed
+- notebooks folder.
+
 ## [0.2.3] – 2026-01-06
 
 ### Added
@@ -21,10 +33,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Support for building cylindrical basis functions.
 - Unit tests for the `basis` module updated to match refactored changes.
 - Unit tests for `Profiles` were added.
-- Support to compute EXP coefficients from particle positions and masses.
-- MPI support for EXP coefficient computation.
-- Unit tests for EXP coefficient computation.
-- Unit tests performed on a Milky Way simulated galaxy.
 - Matplotlib `exptools` style implemented in `utils/`.
 - Unit tests for the plotting style.
 - Grid3D tutorial

@@ -1,21 +1,22 @@
 # Re-export selected submodules and utilities at the package level
-from .basis.profiles import Profiles
-from .basis.basis_utils import load_basis, make_basis, write_config
+from .utils import Profiles, evaluate_density_profile
+from .basis.basis_utils import load_basis, make_basis, write_config, config_dict_to_yaml
 from .basis.makemodel import make_model
+from .coefficients import compute_exp_coefs, compute_exp_coefs_parallel
 from .utils.halo import ICHernquist
 from .visuals import Grid3D, use_exptools_style
-
 # Declare the public API
 __all__ = [
     "Profiles",
+    "load_basis",
     "make_basis",
     "write_config",
-    "make_Dfit",
+    "config_dict_to_yaml",
     "make_model",
-    "exp_coefficients",
+    "compute_exp_coefs",
+    "compute_exp_coefs_parallel",
     "ICHernquist",
-    "load_basis",
     "Grid3D",
-    "use_exptools_style"
-]
+    "use_exptools_style",
+    ]
 
