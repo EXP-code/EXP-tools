@@ -2,14 +2,18 @@ import os
 import time
 import logging
 import warnings
+from typing import TYPE_CHECKING
 import pyEXP
 
-try:
+if TYPE_CHECKING:
     from mpi4py import MPI
-    MPI_AVAILABLE = True
-except ImportError:
-    MPI = None
-    MPI_AVAILABLE = False
+else:
+    try:
+        from mpi4py import MPI  # type: ignore
+        MPI_AVAILABLE = True
+    except ImportError:
+        MPI = None  # type: ignore
+        MPI_AVAILABLE = False
 
 def compute_exp_coefs(
     particle_data,
