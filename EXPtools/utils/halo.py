@@ -73,5 +73,3 @@ def triaxial(self, axis_ratios, rot_angle, rot_axis='z', center=None):
         rot_xyz = rot.apply(xyz)
 
         return rot_xyz
-
-

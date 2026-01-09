@@ -164,4 +164,3 @@ def evaluate_density_profile(radii, amplitude, scale_radius, alpha=1.0, beta=3.0
 
     # Call the selected profile function with provided kwargs
     return func(**kwargs)
-
