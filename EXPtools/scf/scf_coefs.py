@@ -5,7 +5,6 @@ routines to translate coefficients between agama, gala, EXP, galpy
 
 import numpy as np
 from scipy import special
-import pyEXP
 
 
 def agama_to_gala(agama_coefs, nmax, lmax):

@@ -7,10 +7,8 @@ in Ben Lowing et al+11 equation 14 (MNRAS 416, 2697-2711).
 """
 
 import numpy as np
-import sys
 from scipy import special
 import math
-import time
 
 class SCFfields:
     def __init__(self, pos, S, T, rs, nmax, lmax, G, M):
@@ -116,8 +114,8 @@ class SCFfields:
         A = self.s**(l-1)/(1+self.s)**(2*l+2) * special.eval_gegenbauer(n, 2*l+1.5, ((self.s-1)/(self.s+1)))
         B_factor = -4*(2*l+3/2.)
         B = self.s**l/(1+self.s)**(2*l+3) * special.eval_gegenbauer(n-1, 2*l+2.5, ((self.s-1)/(self.s+1)))
-        d_phi_dr = factor * ( A_factor*A + B_factor*B) * special.lpmv(m, l, np.cos(self.theta))
-        d_phi_dtheta = m*np.cot(self.theta)*np.sqrt()
+        #factor * ( A_factor*A + B_factor*B) * special.lpmv(m, l, np.cos(self.theta))
+        #m*np.cot(self.theta)*np.sqrt()
 
     def acceleration(self, n, l, m, s, theta):
         # Computes bfe accelerations Eqn: 17-19 in Lowing+11
